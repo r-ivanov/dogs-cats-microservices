@@ -1,0 +1,24 @@
+# Maven
+target/
+*.log
+
+# Coverage
+target/site/
+jacoco.exec
+
+# IDEs
+/.idea
+/.classpath
+/.project
+/.settings
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
+
+# Docker
+*.tar

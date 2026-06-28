@@ -1,0 +1,16 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Maven@4
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'clean verify'
+    options: '-DskipTests=false'
+    publishJUnitResults: true
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/surefire-reports/*.xml'
