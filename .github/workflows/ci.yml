@@ -18,5 +18,12 @@ jobs:
         distribution: 'temurin'
         java-version: '25'
 
-    - name: Build and test
-      run: mvn clean verify
+    - name: Build dogs-service
+      run: |
+        cd dogs-service
+        mvn clean verify
+
+    - name: Build cats-service
+      run: |
+        cd cats-service
+        mvn clean verify
