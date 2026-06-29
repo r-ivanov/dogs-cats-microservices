@@ -33,16 +33,4 @@ public class Dog {
 
     @Column(nullable = false)
     private Integer age;
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setBreed(String breed) {
-		this.breed = breed;
-	}
-	
-	public void setAge(Integer age) {
-		this.age = age;
-	}
 }

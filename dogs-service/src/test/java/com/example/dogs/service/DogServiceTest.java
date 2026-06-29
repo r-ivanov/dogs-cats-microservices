@@ -31,258 +31,304 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ExtendWith(MockitoExtension.class)
 class DogServiceTest {
 
-    @Mock
-    private DogRepository repository;
+  @Mock
+  private DogRepository repository;
+
+  @InjectMocks
+  private DogService service;
+
+  @Mock
+  private DogMapper mapper;
 
-    @InjectMocks
-    private DogService service;
+  @Mock
+  private WebClient webClient;
 
-	@Mock
-	private DogMapper mapper;
+  private Dog dog;
+
+  @BeforeEach
+  void setUp() {
+    dog = new Dog();
+    dog.setId(1L);
+    dog.setName("Rocky");
+    dog.setBreed("Bulldog");
+    dog.setAge(5);
+  }
+
+  @Test
+  void getAll_shouldReturnDogs() {
+
+    DogResponse response = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
+
+    when(repository.findAll()).thenReturn(List.of(dog));
+    when(mapper.toResponse(dog)).thenReturn(response);
+
+    List<DogResponse> result = service.getAll();
+
+    assertEquals(1, result.size());
+    assertEquals("Rocky", result.get(0).getName());
 
-	@Mock
-	private WebClient webClient;
+    verify(repository).findAll();
+  }
 
-    private Dog dog;
+  @Test
+  void getAll_shouldReturnEmptyList() {
 
-    @BeforeEach
-    void setUp() {
-        dog = new Dog();
-        dog.setId(1L);
-        dog.setName("Rocky");
-        dog.setBreed("Bulldog");
-        dog.setAge(5);
-    }
+    when(repository.findAll()).thenReturn(List.of());
+    List<DogResponse> result = service.getAll();
+    assertTrue(result.isEmpty());
+  }
+  
+  @Test
+  void getAll_shouldReturnMappedList_multipleElements() {
+
+    Dog dog2 = new Dog();
+    dog2.setId(2L);
+    dog2.setName("Roket");
+    dog2.setBreed("Husky");
+    dog2.setAge(2);
 
-    @Test
-    void getAll_shouldReturnDogs() {
+    DogResponse response1 = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(3)
+      .build();
 
-    	DogResponse response = DogResponse.builder()
-    	        .id(1L)
-    	        .name("Rocky")
-    	        .breed("Bulldog")
-    	        .age(5)
-    	        .build();
+    DogResponse response2 = DogResponse.builder()
+      .id(2L)
+      .name("Roket")
+      .breed("Husky")
+      .age(2)
+      .build();
+
+    when(repository.findAll()).thenReturn(List.of(dog, dog2));
+    when(mapper.toResponse(dog)).thenReturn(response1);
+    when(mapper.toResponse(dog2)).thenReturn(response2);
+
+    List<DogResponse> result = service.getAll();
 
-    	when(repository.findAll()).thenReturn(List.of(dog));
-    	when(mapper.toResponse(dog)).thenReturn(response);
+    assertEquals(2, result.size());
+  }
 
-        List<DogResponse> result = service.getAll();
+  @Test
+  void getById_shouldReturnDog_whenExists() {
 
-        assertEquals(1, result.size());
-        assertEquals("Rocky", result.get(0).getName());
+    DogResponse response = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
 
-        verify(repository).findAll();
-    }
+    when(repository.findById(1L)).thenReturn(Optional.of(dog));
+    when(mapper.toResponse(dog)).thenReturn(response);
 
-    @Test
-    void getById_shouldReturnDog_whenExists() {
+    DogResponse result = service.getById(1L);
+
+    assertEquals("Rocky", result.getName());
 
-    	DogResponse response = DogResponse.builder()
-    	        .id(1L)
-    	        .name("Rocky")
-    	        .breed("Bulldog")
-    	        .age(5)
-    	        .build();
+    verify(repository).findById(1L);
+  }
 
-    	when(repository.findById(1L)).thenReturn(Optional.of(dog));
-    	when(mapper.toResponse(dog)).thenReturn(response);
+  @Test
+  void getById_shouldThrowException_whenNotFound() {
 
-        DogResponse result = service.getById(1L);
+    when(repository.findById(1L)).thenReturn(Optional.empty());
 
-        assertEquals("Rocky", result.getName());
+    assertThrows(ResourceNotFoundException.class, () -> {
+      service.getById(1L);
+    });
+  }
 
-        verify(repository).findById(1L);
-    }
+  @Test
+  void create_shouldSaveDog() {
 
-    @Test
-    void getById_shouldThrowException_whenNotFound() {
+    DogRequest request = DogRequest.builder()
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.empty());
+    Dog dog = new Dog();
+    dog.setId(1L);
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            service.getById(1L);
-        });
-    }
+    DogResponse response = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
 
-    @Test
-    void create_shouldSaveDog() {
+    when(mapper.toEntity(request)).thenReturn(dog);
+    when(repository.save(dog)).thenReturn(dog);
+    when(mapper.toResponse(dog)).thenReturn(response);
 
-        DogRequest request = DogRequest.builder()
-                .name("Rocky")
-                .breed("Bulldog")
-                .age(5)
-                .build();
+    DogResponse result = service.create(request);
 
-        Dog dog = new Dog();
-        dog.setId(1L);
+    assertEquals("Rocky", result.getName());
+  }
 
-        DogResponse response = DogResponse.builder()
-                .id(1L)
-                .name("Rocky")
-                .breed("Bulldog")
-                .age(5)
-                .build();
+  @Test
+  void create_shouldCallMapper() {
 
-        when(mapper.toEntity(request)).thenReturn(dog);
-        when(repository.save(dog)).thenReturn(dog);
-        when(mapper.toResponse(dog)).thenReturn(response);
+    DogRequest request = DogRequest.builder()
+      .name("Test")
+      .breed("Husky")
+      .age(2)
+      .build();
 
-        DogResponse result = service.create(request);
+    when(mapper.toEntity(request)).thenReturn(dog);
+    when(repository.save(dog)).thenReturn(dog);
+    when(mapper.toResponse(dog)).thenReturn(
+      DogResponse.builder().name("Test").build()
+    );
 
-        assertEquals("Rocky", result.getName());
-    }
+    service.create(request);
 
-    @Test
-    void delete_shouldDeleteDog_whenExists() {
+    verify(mapper).toEntity(request);
+  }
 
-        when(repository.existsById(1L)).thenReturn(true);
+  @Test
+  void create_shouldHandleMapping() {
 
-        service.delete(1L);
+    DogRequest request = DogRequest.builder()
+      .name("Test")
+      .breed("Test")
+      .age(1)
+      .build();
 
-        verify(repository).deleteById(1L);
-    }
+    DogResponse response = DogResponse.builder()
+      .name("Test")
+      .build();
 
-    @Test
-    void delete_shouldThrowException_whenNotFound() {
+    when(mapper.toEntity(request)).thenReturn(dog);
+    when(repository.save(dog)).thenReturn(dog);
+    when(mapper.toResponse(dog)).thenReturn(response);
 
-        when(repository.existsById(1L)).thenReturn(false);
+    DogResponse result = service.create(request);
 
-        assertThrows(ResourceNotFoundException.class,
-            () -> service.delete(1L));
-    }
+    assertNotNull(result);
+  }
 
-    @Test
-    void update_shouldUpdateDog_whenExists() {
+  @Test
+  void update_shouldUpdateDog_whenExists() {
 
-        Dog existing = new Dog();
-        existing.setId(1L);
+    DogRequest request = DogRequest.builder()
+            .name("NewName")
+            .breed("NewBreed")
+            .age(3)
+            .build();
 
-        DogRequest request = DogRequest.builder()
-                .name("NewName")
-                .breed("NewBreed")
-                .age(3)
-                .build();
+    DogResponse response = DogResponse.builder()
+            .id(1L)
+            .name("NewName")
+            .breed("NewBreed")
+            .age(3)
+            .build();
 
-        DogResponse response = DogResponse.builder()
-                .id(1L)
-                .name("NewName")
-                .breed("NewBreed")
-                .age(3)
-                .build();
+    when(repository.findById(1L)).thenReturn(Optional.of(dog));
+    when(repository.save(any(Dog.class))).thenReturn(dog);
+    when(mapper.toResponse(dog)).thenReturn(response);
 
-        when(repository.findById(1L)).thenReturn(Optional.of(existing));
-        when(repository.save(any(Dog.class))).thenReturn(existing);
-        when(mapper.toResponse(existing)).thenReturn(response);
+    DogResponse result = service.update(1L, request);
 
-        DogResponse result = service.update(1L, request);
+    assertEquals("NewName", result.getName());
+  }
 
-        assertEquals("NewName", result.getName());
-    }
+  @Test
+  void update_shouldThrowException_whenNotFound() {
 
-    @Test
-    void update_shouldThrowException_whenNotFound() {
+    DogRequest request = DogRequest.builder()
+      .name("Test")
+      .breed("Test")
+      .age(2)
+      .build();
 
-        DogRequest request = DogRequest.builder()
-                .name("Test")
-                .breed("Test")
-                .age(2)
-                .build();
+    when(repository.findById(1L)).thenReturn(Optional.empty());
 
-        when(repository.findById(1L)).thenReturn(Optional.empty());
+    assertThrows(ResourceNotFoundException.class,
+      () -> service.update(1L, request));
+  }
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> service.update(1L, request));
-    }
+  @Test
+  void delete_shouldDeleteDog_whenExists() {
 
-    @Test
-    void getAll_shouldReturnEmptyList() {
+    when(repository.existsById(1L)).thenReturn(true);
+    service.delete(1L);
+    verify(repository).deleteById(1L);
+  }
 
-        when(repository.findAll()).thenReturn(List.of());
+  @Test
+  void delete_shouldThrowException_whenNotFound() {
 
-        List<DogResponse> result = service.getAll();
+    when(repository.existsById(1L)).thenReturn(false);
 
-        assertTrue(result.isEmpty());
-    }
+    assertThrows(ResourceNotFoundException.class,
+      () -> service.delete(1L));
+  }
 
-    @Test
-    void create_shouldHandleMapping() {
+  @Test
+  void getPokemons_shouldReturnList() {
 
-        DogRequest request = DogRequest.builder()
-                .name("Test")
-                .breed("Test")
-                .age(1)
-                .build();
+    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
+    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
+    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
 
-        Dog dog = new Dog();
-        DogResponse response = DogResponse.builder().name("Test").build();
+    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
+    when(uriSpec.uri(anyString(), anyInt())).thenReturn(headersSpec);
+    when(headersSpec.retrieve()).thenReturn(responseSpec);
+    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
 
-        when(mapper.toEntity(request)).thenReturn(dog);
-        when(repository.save(dog)).thenReturn(dog);
-        when(mapper.toResponse(dog)).thenReturn(response);
+    List<Map<String, Object>> mockResponse = List.of(
+      Map.of("name", "Pikachu")
+    );
 
-        DogResponse result = service.create(request);
+    when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
+      .thenReturn((Mono) Mono.just(mockResponse));
 
-        assertNotNull(result);
-    }
+    List<PokemonResponse> result = service.getPokemons(1);
 
-    @Test
-    void getPokemons_shouldReturnList() {
+    assertEquals(1, result.size());
+    assertEquals("Pikachu", result.get(0).getName());
+  }
 
-    	WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    	WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    	WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+  @Test
+  void getJoke_shouldReturnSingleJoke() {
 
-    	when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-        when(uriSpec.uri(anyString(), anyInt())).thenReturn(headersSpec);
-        when(headersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
+    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
+    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
 
-        List<Map<String, Object>> mockResponse = List.of(
-                Map.of("name", "Pikachu")
-        );
+    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
+    when(uriSpec.uri(anyString())).thenReturn(headersSpec);
+    when(headersSpec.retrieve()).thenReturn(responseSpec);
+    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
 
-        when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
-                .thenReturn((Mono) Mono.just(mockResponse));
+    Map<String, Object> mockResponse = Map.of(
+      "type", "single",
+      "joke", "Funny joke"
+    );
 
-        List<PokemonResponse> result = service.getPokemons(1);
+    when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
+      .thenReturn((Mono) Mono.just(mockResponse));
 
-        assertEquals(1, result.size());
-        assertEquals("Pikachu", result.get(0).getName());
-    }
+    JokeResponse result = service.getJoke();
 
-    @Test
-    void getJoke_shouldReturnSingleJoke() {
+    assertEquals("single", result.getType());
+    assertEquals("Funny joke", result.getContent());
+  }
 
-    	WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    	WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    	WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+  @Test
+  void externalServiceException_shouldCreateCorrectly() {
 
-    	when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-        when(uriSpec.uri(anyString())).thenReturn(headersSpec);
-        when(headersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    ExternalServiceException ex =
+      new ExternalServiceException("Error externo");
 
-        Map<String, Object> mockResponse = Map.of(
-                "type", "single",
-                "joke", "Funny joke"
-        );
-
-        when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
-                .thenReturn((Mono) Mono.just(mockResponse));
-
-        JokeResponse result = service.getJoke();
-
-        assertEquals("single", result.getType());
-        assertEquals("Funny joke", result.getContent());
-    }
-
-    @Test
-    void externalServiceException_shouldCreateCorrectly() {
-
-        ExternalServiceException ex =
-                new ExternalServiceException("Error externo");
-
-        assertEquals("Error externo", ex.getMessage());
-    }
+    assertEquals("Error externo", ex.getMessage());
+  }
 }

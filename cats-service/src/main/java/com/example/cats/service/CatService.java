@@ -74,6 +74,9 @@ public class CatService {
 
     @CacheEvict(value = {"cats", "cat"}, allEntries = true)
     public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Cat not found");
+        }
         repository.deleteById(id);
     }
 
