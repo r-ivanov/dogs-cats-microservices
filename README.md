@@ -100,7 +100,7 @@ Ejecutar tests:
 cd dogs-service
 mvn clean test
 cd ../cats-service
-mvn clean package
+mvn clean test
 ```
 
 ### Cobertura
