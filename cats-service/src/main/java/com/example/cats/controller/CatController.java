@@ -39,240 +39,239 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CatController {
 
-    private final CatService service;
+  private final CatService service;
 
-    @Operation(
-        summary = "Get all cats",
-        description = "Retrieve all cats"
+  @Operation(
+    summary = "Get all cats",
+    description = "Retrieve all cats"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "200",
+      description = "Cats retrieved successfully",
+      content = @Content(
+        schema = @Schema(implementation = CatResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Internal server error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Cats retrieved successfully",
-            content = @Content(
-                schema = @Schema(implementation = CatResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        )
-	})
-    @GetMapping
-    public List<CatResponse> getAll() {
-        return service.getAll();
-    }
+  })
+  @GetMapping
+  public List<CatResponse> getAll() {
+    return service.getAll();
+  }
 
-    @Operation(
-        summary = "Get cat by ID",
-        description = "Retrieve a cat by its ID"
+  @Operation(
+    summary = "Get cat by ID",
+    description = "Retrieve a cat by its ID"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "200",
+      description = "Cat retrieved successfully",
+      content = @Content(
+        schema = @Schema(implementation = CatResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Cat not found",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Internal server error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Cat retrieved successfully",
-            content = @Content(
-                schema = @Schema(implementation = CatResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Cat not found",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        )
-	})
-    @GetMapping("/{id}")
-    public CatResponse getById(@PathVariable Long id) {
-        return service.getById(id);
-    }
+  })
+  @GetMapping("/{id}")
+  public CatResponse getById(@PathVariable Long id) {
+      return service.getById(id);
+  }
 
 
-    @Operation(
-        summary = "Create cat",
-        description = "Create a new cat"
+  @Operation(
+    summary = "Create cat",
+    description = "Create a new cat"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "201",
+      description = "Cat created successfully",
+      content = @Content(
+        schema = @Schema(implementation = CatResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "Validation error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Internal server error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Cat created successfully",
-            content = @Content(
-                schema = @Schema(implementation = CatResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        )
-    })
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CatResponse create(@Valid @RequestBody CatRequest request) {
-        return service.create(request);
-    }
+  })
+  @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
+  public CatResponse create(@Valid @RequestBody CatRequest request) {
+    return service.create(request);
+  }
 
 
-    @Operation(
-        summary = "Update cat",
-        description = "Update an existing cat"
+  @Operation(
+    summary = "Update cat",
+    description = "Update an existing cat"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "200",
+      description = "Cat updated successfully",
+      content = @Content(
+        schema = @Schema(implementation = CatResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "Validation error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Cat not found",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Internal server error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Cat updated successfully",
-            content = @Content(
-                schema = @Schema(implementation = CatResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Cat not found",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        )
-    })
-    @PutMapping("/{id}")
-    public CatResponse update(@PathVariable Long id,
-                              @Valid @RequestBody CatRequest request) {
-        return service.update(id, request);
-    }
+  })
+  @PutMapping("/{id}")
+  public CatResponse update(@PathVariable Long id, @Valid @RequestBody CatRequest request) {
+    return service.update(id, request);
+  }
 
 
-    @Operation(
-        summary = "Delete cat",
-        description = "Delete a cat"
+  @Operation(
+    summary = "Delete cat",
+    description = "Delete a cat"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "204",
+      description = "Cat deleted successfully"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Cat not found",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Internal server error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "204",
-            description = "Cat deleted successfully"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Cat not found",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        )
-    })
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
-    }
+  })
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void delete(@PathVariable Long id) {
+    service.delete(id);
+  }
 
 
-	@Operation(
-		summary = "Get joke",
-		description = "Retrieve a joke from Dogs service"
-	)
-	@ApiResponses(value = {
-	    @ApiResponse(
-    		responseCode = "200",
-    		description = "Joke retrieved successfully"
-	    ),
-	    @ApiResponse(
-    		responseCode = "502",
-    		description = "Error from Dogs service",
-    	    content = @Content(
-    	        schema = @Schema(implementation = ErrorResponse.class)
-    	    )
-	    ),
-	    @ApiResponse(
-    		responseCode = "500",
-    		description = "Internal server error",
-    	    content = @Content(
-    	        schema = @Schema(implementation = ErrorResponse.class)
-    	    )
-	    )
-	})
-    @GetMapping("/joke")
-    public JokeResponse getJoke() {
-        return service.getJokeFromDogs();
-    }
-
-
-    @Operation(
-        summary = "Get pokemons",
-        description = "Retrieve pokemons from external API"
+  @Operation(
+    summary = "Get joke",
+    description = "Retrieve a joke from Dogs service"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "200",
+      description = "Joke retrieved successfully"
+    ),
+    @ApiResponse(
+      responseCode = "502",
+      description = "Error from Dogs service",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Internal server error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Pokemons retrieved successfully",
-            content = @Content(
-                schema = @Schema(implementation = PokemonResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid limit value",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "502",
-            description = "Error from external Pokemon API",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        )
-    })
-    @GetMapping("/pokemons")
-	public List<PokemonResponse> getPokemons(
-			@Parameter(description = "Number of pokemons to retrieve", example = "100")
-			@RequestParam(name = "limit", defaultValue = "100") @Min(1) @Max(200) int limit) {
-	    return service.getPokemons(limit);
-	}
+  })
+  @GetMapping("/joke")
+  public JokeResponse getJoke() {
+    return service.getJokeFromDogs();
+  }
+
+
+  @Operation(
+    summary = "Get pokemons",
+    description = "Retrieve pokemons from external API"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "200",
+      description = "Pokemons retrieved successfully",
+      content = @Content(
+        schema = @Schema(implementation = PokemonResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "Invalid limit value",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "502",
+      description = "Error from external Pokemon API",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Internal server error",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    )
+  })
+  @GetMapping("/pokemons")
+  public List<PokemonResponse> getPokemons(
+    @Parameter(description = "Number of pokemons to retrieve", example = "100")
+    @RequestParam(name = "limit", defaultValue = "100") @Min(1) @Max(200) int limit) {
+    return service.getPokemons(limit);
+  }
 }

@@ -10,8 +10,8 @@ import com.example.cats.dto.CatResponse;
 @Mapper(componentModel = "spring")
 public interface CatMapper {
 
-	@Mapping(target = "id", ignore = true)
-    Cat toEntity(CatRequest request);
+  @Mapping(target = "id", ignore = true)
+  Cat toEntity(CatRequest request);
 
-    CatResponse toResponse(Cat cat);
+  CatResponse toResponse(Cat cat);
 }

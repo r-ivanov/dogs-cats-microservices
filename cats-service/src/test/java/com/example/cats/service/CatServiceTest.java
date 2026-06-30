@@ -76,7 +76,7 @@ class CatServiceTest {
     List<CatResponse> result = service.getAll();
     assertTrue(result.isEmpty());
   }
-  
+
   @Test
   void getAll_shouldReturnMappedList_multipleElements() {
 
@@ -342,77 +342,77 @@ class CatServiceTest {
   @Test
   void getPokemons_shouldThrowException_whenResponseInvalid() {
 
-      WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-      WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-      WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
+    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
+    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
 
-      when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-      when(uriSpec.uri(any(java.util.function.Function.class))).thenReturn(headersSpec);
-      when(headersSpec.retrieve()).thenReturn(responseSpec);
-      when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
+    when(uriSpec.uri(any(java.util.function.Function.class))).thenReturn(headersSpec);
+    when(headersSpec.retrieve()).thenReturn(responseSpec);
+    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
 
-      // Simulamos respuesta inválida (sin results)
-      when(responseSpec.bodyToMono(PokemonApiResponse.class))
-              .thenReturn(reactor.core.publisher.Mono.just(new PokemonApiResponse()));
+    // Simulamos respuesta inválida (sin results)
+    when(responseSpec.bodyToMono(PokemonApiResponse.class))
+      .thenReturn(reactor.core.publisher.Mono.just(new PokemonApiResponse()));
 
-      assertThrows(ExternalServiceException.class, () -> {
-          service.getPokemons(1);
-      });
+    assertThrows(ExternalServiceException.class, () -> {
+      service.getPokemons(1);
+    });
   }
 
   @Test
   void getPokemons_shouldThrowException_whenResponseNull() {
 
-      WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-      WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-      WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
+    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
+    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
 
-      when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-      when(uriSpec.uri(any(java.util.function.Function.class))).thenReturn(headersSpec);
-      when(headersSpec.retrieve()).thenReturn(responseSpec);
-      when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
+    when(uriSpec.uri(any(java.util.function.Function.class))).thenReturn(headersSpec);
+    when(headersSpec.retrieve()).thenReturn(responseSpec);
+    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
 
-      when(responseSpec.bodyToMono(PokemonApiResponse.class))
-              .thenReturn(reactor.core.publisher.Mono.empty());
+    when(responseSpec.bodyToMono(PokemonApiResponse.class))
+      .thenReturn(reactor.core.publisher.Mono.empty());
 
-      assertThrows(ExternalServiceException.class, () -> {
-          service.getPokemons(1);
-      });
+    assertThrows(ExternalServiceException.class, () -> {
+      service.getPokemons(1);
+    });
   }
 
   @Test
   void getJokeFromDogs_shouldThrowException_whenExternalError() {
 
-      WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-      WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-      WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
+    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
+    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
 
-      when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-      when(uriSpec.uri(anyString())).thenReturn(headersSpec);
-      when(headersSpec.retrieve()).thenReturn(responseSpec);
+    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
+    when(uriSpec.uri(anyString())).thenReturn(headersSpec);
+    when(headersSpec.retrieve()).thenReturn(responseSpec);
 
-      when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
 
-      // simulamos error devolviendo Mono vacío (trigger fallback)
-      when(responseSpec.bodyToMono(JokeResponse.class))
-              .thenReturn(reactor.core.publisher.Mono.empty());
+    // simulamos error devolviendo Mono vacío (trigger fallback)
+    when(responseSpec.bodyToMono(JokeResponse.class))
+      .thenReturn(reactor.core.publisher.Mono.empty());
 
-      assertThrows(ExternalServiceException.class, () -> {
-          service.getJokeFromDogs();
-      });
+    assertThrows(ExternalServiceException.class, () -> {
+      service.getJokeFromDogs();
+    });
   }
 
   @Test
   void externalServiceException_shouldCreateCorrectly() {
 
-      ExternalServiceException ex =
-              new ExternalServiceException("Error externo");
+    ExternalServiceException ex =
+      new ExternalServiceException("Error externo");
 
-      assertEquals("Error externo", ex.getMessage());
+    assertEquals("Error externo", ex.getMessage());
   }
 
   @Test
   void main_shouldRun() {
-      CatsServiceApplication.main(new String[] {});
+    CatsServiceApplication.main(new String[] {});
   }
 }

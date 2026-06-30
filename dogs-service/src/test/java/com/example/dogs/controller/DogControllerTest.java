@@ -33,317 +33,317 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @AutoConfigureMockMvc
 class DogControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @MockitoBean
-    private DogService service;
-
-    @Test
-    void getAll_shouldReturnDogs() throws Exception {
-
-      DogResponse dog = DogResponse.builder()
-        .id(1L)
-        .name("Rocky")
-        .breed("Bulldog")
-        .age(5)
-        .build();
-
-      when(service.getAll()).thenReturn(List.of(dog));
-
-      mockMvc.perform(get("/api/dogs"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].name").value("Rocky"));
-    }
-
-    @Test
-    void getById_shouldReturnDog() throws Exception {
-
-      DogResponse dog = DogResponse.builder()
-        .id(1L)
-        .name("Rocky")
-        .breed("Bulldog")
-        .age(5)
-        .build();
-
-      when(service.getById(1L)).thenReturn(dog);
-
-      mockMvc.perform(get("/api/dogs/1"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.name").value("Rocky"));
-    }
-
-    @Test
-    void getById_shouldReturn404_whenNotFound() throws Exception {
-
-      when(service.getById(1L))
-        .thenThrow(new ResourceNotFoundException("Not found"));
-
-      mockMvc.perform(get("/api/dogs/1"))
-        .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void create_shouldReturn201_whenValid() throws Exception {
-
-      DogRequest request = DogRequest.builder()
-        .name("Rocky")
-        .breed("Bulldog")
-        .age(5)
-        .build();
-
-      DogResponse response = DogResponse.builder()
-        .id(1L)
-        .name("Rocky")
-        .breed("Bulldog")
-        .age(5)
-        .build();
-
-      when(service.create(any(DogRequest.class))).thenReturn(response);
-
-      mockMvc.perform(post("/api/dogs")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.name").value("Rocky"));
-    }
-
-    @Test
-    void create_shouldReturn400_whenNullBody() throws Exception {
-
-        mockMvc.perform(post("/api/dogs")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content("{}"))
-          .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_shouldReturn400_whenNameBlank() throws Exception {
-
-      DogRequest request = DogRequest.builder()
-        .name("")     // inválido
-        .breed("Bulldog")
-        .age(5)
-        .build();
-
-      mockMvc.perform(post("/api/dogs")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_shouldReturn400_whenAgeNegative() throws Exception {
-
-      DogRequest request = DogRequest.builder()
-        .name("Rocky")
-        .breed("Bulldog")
-        .age(-1)
-        .build();
-
-      mockMvc.perform(post("/api/dogs")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_shouldReturn400_whenAgeTooHigh() throws Exception {
-
-      DogRequest request = DogRequest.builder()
-        .name("Rocky")
-        .breed("Bulldog")
-        .age(50)
-        .build();
-
-      mockMvc.perform(post("/api/dogs")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_shouldReturnValidationMessage() throws Exception {
-
-      DogRequest request = DogRequest.builder()
-        .name("")   // fuerza error
-        .breed("")  // fuerza error
-        .age(-1)    // fuerza error
-        .build();
-
-      mockMvc.perform(post("/api/dogs")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").exists())
-        .andExpect(jsonPath("$.path").value("/api/dogs"));
-    }
-
-    @Test
-    void create_shouldReturn500_whenServiceFails() throws Exception {
-
-    	DogRequest request = DogRequest.builder()
-        .name("Rocky")
-        .breed("Bulldog")
-        .age(5)
-        .build();
-
-        when(service.create(any()))
-          .thenThrow(new RuntimeException("error"));
-
-        mockMvc.perform(post("/api/dogs")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(objectMapper.writeValueAsString(request)))
-          .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    void update_shouldReturnUpdatedDog() throws Exception {
-
-      DogRequest request = DogRequest.builder()
-        .name("NewName")
-        .breed("White")
-        .age(2)
-        .build();
-
-      DogResponse response = DogResponse.builder()
-        .id(1L)
-        .name("NewName")
-        .breed("White")
-        .age(2)
-        .build();
-
-      when(service.update(eq(1L), any(DogRequest.class)))
-        .thenReturn(response);
-
-      mockMvc.perform(put("/api/dogs/1")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.name").value("NewName"));
-    }
-
-    @Test
-    void update_shouldReturn404_whenNotFound() throws Exception {
-
-      DogRequest request = DogRequest.builder()
-        .name("Test")
-        .breed("Husky")
-        .age(2)
-        .build();
-
-      when(service.update(eq(1L), any(DogRequest.class)))
-        .thenThrow(new ResourceNotFoundException("Not found"));
-
-      mockMvc.perform(put("/api/dogs/1")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void delete_shouldReturn204() throws Exception {
-
-      mockMvc.perform(delete("/api/dogs/1"))
-        .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void delete_shouldReturn404_whenNotFound() throws Exception {
-
-      doThrow(new ResourceNotFoundException("Not found"))
-        .when(service).delete(1L);
-
-      mockMvc.perform(delete("/api/dogs/1"))
-        .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getJoke_shouldReturnJoke() throws Exception {
-
-      JokeResponse response = JokeResponse.builder()
-        .type("single")
-        .content("Funny joke")
-        .build();
-
-      when(service.getJoke()).thenReturn(response);
-
-      mockMvc.perform(get("/api/dogs/joke"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.type").value("single"));
-    }
-
-    @Test
-    void getJoke_shouldReturn502_whenExternalFails() throws Exception {
-
-      when(service.getJoke())
-        .thenThrow(new ExternalServiceException("fail"));
-
-      mockMvc.perform(get("/api/dogs/joke"))
-        .andExpect(status().isBadGateway());
-    }
-
-    @Test
-    void getPokemons_shouldReturnList() throws Exception {
-
-      PokemonResponse pokemon = new PokemonResponse();
-      pokemon.setName("pikachu");
-
-      when(service.getPokemons(10)).thenReturn(List.of(pokemon));
-
-      mockMvc.perform(get("/api/dogs/pokemons?limit=10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].name").value("pikachu"));
-    }
-
-    @Test
-    void getPokemons_shouldReturn502_whenExternalFails() throws Exception {
-
-      when(service.getPokemons(anyInt()))
-        .thenThrow(new ExternalServiceException("fail"));
-
-      mockMvc.perform(get("/api/dogs/pokemons?limit=10"))
-        .andExpect(status().isBadGateway());
-    }
-
-    @Test
-    void getPokemons_shouldReturn400_whenLimitTooHigh() throws Exception {
-
-      when(service.getPokemons(anyInt()))
-        .thenThrow(new jakarta.validation.ConstraintViolationException("invalid", null));
-
-      mockMvc.perform(get("/api/dogs/pokemons?limit=300"))
-        .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getPokemons_shouldReturn400_whenLimitInvalid() throws Exception {
-
-      when(service.getPokemons(anyInt()))
-        .thenThrow(new jakarta.validation.ConstraintViolationException("invalid", null));
-
-      mockMvc.perform(get("/api/dogs/pokemons?limit=0"))
-        .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void resourceNotFoundException_shouldCreateCorrectly() {
-
-      ResourceNotFoundException ex = new ResourceNotFoundException("not found");
-      assertEquals("not found", ex.getMessage());
-    }
-
-    @Test
-    void errorResponse_shouldBuildCorrectly() {
-
-      ErrorResponse error = ErrorResponse.builder()
-        .status(404)
-        .message("Not found")
-        .path("/api/test")
-        .build();
-
-      assertEquals(404, error.getStatus());
-    }
+  @Autowired
+  private MockMvc mockMvc;
+
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @MockitoBean
+  private DogService service;
+
+  @Test
+  void getAll_shouldReturnDogs() throws Exception {
+
+    DogResponse dog = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
+
+    when(service.getAll()).thenReturn(List.of(dog));
+
+    mockMvc.perform(get("/api/dogs"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].name").value("Rocky"));
+  }
+
+  @Test
+  void getById_shouldReturnDog() throws Exception {
+
+    DogResponse dog = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
+
+    when(service.getById(1L)).thenReturn(dog);
+
+    mockMvc.perform(get("/api/dogs/1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name").value("Rocky"));
+  }
+
+  @Test
+  void getById_shouldReturn404_whenNotFound() throws Exception {
+
+    when(service.getById(1L))
+      .thenThrow(new ResourceNotFoundException("Not found"));
+
+    mockMvc.perform(get("/api/dogs/1"))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void create_shouldReturn201_whenValid() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
+
+    DogResponse response = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
+
+    when(service.create(any(DogRequest.class))).thenReturn(response);
+
+    mockMvc.perform(post("/api/dogs")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.name").value("Rocky"));
+  }
+
+  @Test
+  void create_shouldReturn400_whenNullBody() throws Exception {
+
+    mockMvc.perform(post("/api/dogs")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content("{}"))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void create_shouldReturn400_whenNameBlank() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("")     // inválido
+      .breed("Bulldog")
+      .age(5)
+      .build();
+
+    mockMvc.perform(post("/api/dogs")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void create_shouldReturn400_whenAgeNegative() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(-1)
+      .build();
+
+    mockMvc.perform(post("/api/dogs")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void create_shouldReturn400_whenAgeTooHigh() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(50)
+      .build();
+
+    mockMvc.perform(post("/api/dogs")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void create_shouldReturnValidationMessage() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("")   // fuerza error
+      .breed("")  // fuerza error
+      .age(-1)    // fuerza error
+      .build();
+
+    mockMvc.perform(post("/api/dogs")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.message").exists())
+      .andExpect(jsonPath("$.path").value("/api/dogs"));
+  }
+
+  @Test
+  void create_shouldReturn500_whenServiceFails() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .build();
+
+    when(service.create(any()))
+      .thenThrow(new RuntimeException("error"));
+
+    mockMvc.perform(post("/api/dogs")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  void update_shouldReturnUpdatedDog() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("NewName")
+      .breed("White")
+      .age(2)
+      .build();
+
+    DogResponse response = DogResponse.builder()
+      .id(1L)
+      .name("NewName")
+      .breed("White")
+      .age(2)
+      .build();
+
+    when(service.update(eq(1L), any(DogRequest.class)))
+      .thenReturn(response);
+
+    mockMvc.perform(put("/api/dogs/1")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name").value("NewName"));
+  }
+
+  @Test
+  void update_shouldReturn404_whenNotFound() throws Exception {
+
+    DogRequest request = DogRequest.builder()
+      .name("Test")
+      .breed("Husky")
+      .age(2)
+      .build();
+
+    when(service.update(eq(1L), any(DogRequest.class)))
+      .thenThrow(new ResourceNotFoundException("Not found"));
+
+    mockMvc.perform(put("/api/dogs/1")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void delete_shouldReturn204() throws Exception {
+
+    mockMvc.perform(delete("/api/dogs/1"))
+      .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void delete_shouldReturn404_whenNotFound() throws Exception {
+
+    doThrow(new ResourceNotFoundException("Not found"))
+      .when(service).delete(1L);
+
+    mockMvc.perform(delete("/api/dogs/1"))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getJoke_shouldReturnJoke() throws Exception {
+
+    JokeResponse response = JokeResponse.builder()
+      .type("single")
+      .content("Funny joke")
+      .build();
+
+    when(service.getJoke()).thenReturn(response);
+
+    mockMvc.perform(get("/api/dogs/joke"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.type").value("single"));
+  }
+
+  @Test
+  void getJoke_shouldReturn502_whenExternalFails() throws Exception {
+
+    when(service.getJoke())
+      .thenThrow(new ExternalServiceException("fail"));
+
+    mockMvc.perform(get("/api/dogs/joke"))
+      .andExpect(status().isBadGateway());
+  }
+
+  @Test
+  void getPokemons_shouldReturnList() throws Exception {
+
+    PokemonResponse pokemon = new PokemonResponse();
+    pokemon.setName("pikachu");
+
+    when(service.getPokemons(10)).thenReturn(List.of(pokemon));
+
+    mockMvc.perform(get("/api/dogs/pokemons?limit=10"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].name").value("pikachu"));
+  }
+
+  @Test
+  void getPokemons_shouldReturn502_whenExternalFails() throws Exception {
+
+    when(service.getPokemons(anyInt()))
+      .thenThrow(new ExternalServiceException("fail"));
+
+    mockMvc.perform(get("/api/dogs/pokemons?limit=10"))
+      .andExpect(status().isBadGateway());
+  }
+
+  @Test
+  void getPokemons_shouldReturn400_whenLimitTooHigh() throws Exception {
+
+    when(service.getPokemons(anyInt()))
+      .thenThrow(new jakarta.validation.ConstraintViolationException("invalid", null));
+
+    mockMvc.perform(get("/api/dogs/pokemons?limit=300"))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getPokemons_shouldReturn400_whenLimitInvalid() throws Exception {
+
+    when(service.getPokemons(anyInt()))
+      .thenThrow(new jakarta.validation.ConstraintViolationException("invalid", null));
+
+    mockMvc.perform(get("/api/dogs/pokemons?limit=0"))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void resourceNotFoundException_shouldCreateCorrectly() {
+
+    ResourceNotFoundException ex = new ResourceNotFoundException("not found");
+    assertEquals("not found", ex.getMessage());
+  }
+
+  @Test
+  void errorResponse_shouldBuildCorrectly() {
+
+    ErrorResponse error = ErrorResponse.builder()
+      .status(404)
+      .message("Not found")
+      .path("/api/test")
+      .build();
+
+    assertEquals(404, error.getStatus());
+  }
 }

@@ -27,123 +27,122 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DogService {
 
-    private final DogRepository repository;
-    private final DogMapper mapper;
-    private final WebClient webClient;
+  private final DogRepository repository;
+  private final DogMapper mapper;
+  private final WebClient webClient;
 
-	@Value("${services.cats.url}")
-	private String catsServiceUrl;
+  @Value("${services.cats.url}")
+  private String catsServiceUrl;
 
 
-    @Cacheable("dogs")
-    public List<DogResponse> getAll() {
-    	// Comprobar que se ha cacheado y solo se imprime en la primera petición GET
-    	System.out.println("Fetching from DB");
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+  @Cacheable("dogs")
+  public List<DogResponse> getAll() {
+    // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
+    System.out.println("Fetching from DB");
+    return repository.findAll()
+      .stream()
+      .map(mapper::toResponse)
+      .collect(Collectors.toList());
+  }
+
+  @Cacheable(value = "dog", key = "#id")
+  public DogResponse getById(Long id) {
+    // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
+    System.out.println("Fetching from DB");
+    Dog dog = repository.findById(id)
+      .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
+
+    return mapper.toResponse(dog);
+  }
+
+  @CacheEvict(value = "dogs", allEntries = true)
+  public DogResponse create(DogRequest request) {
+    Dog dog = mapper.toEntity(request);
+    return mapper.toResponse(repository.save(dog));
+  }
+
+  @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
+  public DogResponse update(Long id, DogRequest request) {
+    Dog dog = repository.findById(id)
+      .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
+
+    dog.setName(request.getName());
+    dog.setBreed(request.getBreed());
+    dog.setAge(request.getAge());
+
+    return mapper.toResponse(repository.save(dog));
+  }
+
+  @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
+  public void delete(Long id) {
+    if (!repository.existsById(id)) {
+      throw new ResourceNotFoundException("Dog not found");
+    }
+    repository.deleteById(id);
+  }
+
+  public JokeResponse getJoke() {
+
+    Map<String, Object> response = webClient.get()
+      .uri("https://v2.jokeapi.dev/joke/Any?lang=es")
+      .retrieve()
+      .onStatus(
+        status -> status.isError(),
+        clientResponse -> clientResponse.bodyToMono(String.class)
+          .defaultIfEmpty("Sin mensaje")
+          .map(body -> new ExternalServiceException(
+            "Error API externa: "
+            + clientResponse.statusCode()
+            + " - " + body
+          )))
+      .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+      .block();
+
+    if (response == null) {
+      throw new RuntimeException("Error calling Joke API");
     }
 
-    @Cacheable(value = "dog", key = "#id")
-    public DogResponse getById(Long id) {
-    	// Comprobar que se ha cacheado y solo se imprime en la primera petición GET
-    	System.out.println("Fetching from DB");
-        Dog dog = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
+    String type = (String) response.get("type");
 
-        return mapper.toResponse(dog);
+    String content;
+
+    if ("single".equals(type)) {
+      content = (String) response.get("joke");
+    } else {
+      content = response.get("setup") + " - " + response.get("delivery");
     }
 
-    @CacheEvict(value = "dogs", allEntries = true)
-    public DogResponse create(DogRequest request) {
-        Dog dog = mapper.toEntity(request);
-        return mapper.toResponse(repository.save(dog));
+    return JokeResponse.builder()
+      .type(type)
+      .content(content)
+      .build();
+  }
+
+  public List<PokemonResponse> getPokemons(int limit) {
+
+    List<Map<String, Object>> response = webClient.get()
+      .uri(catsServiceUrl + "/api/cats/pokemons?limit={limit}", limit)
+      .retrieve()
+      .onStatus(
+        status -> status.isError(),
+        clientResponse -> clientResponse.bodyToMono(String.class)
+          .defaultIfEmpty("Sin mensaje")
+          .map(body -> new ExternalServiceException(
+            "Error Cats API: "
+            + clientResponse.statusCode()
+            + " - " + body
+          )))
+      .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+      .block();
+
+    if (response == null) {
+      throw new ExternalServiceException("Respuesta vacía de Cats");
     }
 
-    @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
-    public DogResponse update(Long id, DogRequest request) {
-        Dog dog = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
-
-        dog.setName(request.getName());
-        dog.setBreed(request.getBreed());
-        dog.setAge(request.getAge());
-
-        return mapper.toResponse(repository.save(dog));
-    }
-
-    @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Dog not found");
-        }
-        repository.deleteById(id);
-    }
-    
-    public JokeResponse getJoke() {
-
-        Map<String, Object> response = webClient.get()
-                .uri("https://v2.jokeapi.dev/joke/Any?lang=es")
-                .retrieve()
-                .onStatus(
-                	status -> status.isError(),
-                    clientResponse -> clientResponse.bodyToMono(String.class)
-                	    .defaultIfEmpty("Sin mensaje")
-                	    .map(body -> new ExternalServiceException(
-                	        "Error API externa: "
-                	        + clientResponse.statusCode()
-                	        + " - " + body
-						))
-				    )
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
-
-        if (response == null) {
-            throw new RuntimeException("Error calling Joke API");
-        }
-
-        String type = (String) response.get("type");
-
-        String content;
-
-        if ("single".equals(type)) {
-            content = (String) response.get("joke");
-        } else {
-            content = response.get("setup") + " - " + response.get("delivery");
-        }
-
-        return JokeResponse.builder()
-                .type(type)
-                .content(content)
-                .build();
-    }
-
-    public List<PokemonResponse> getPokemons(int limit) {
-
-        List<Map<String, Object>> response = webClient.get()
-        		.uri(catsServiceUrl + "/api/cats/pokemons?limit={limit}", limit)
-                .retrieve()
-                .onStatus(status -> status.isError(),
-                    clientResponse -> clientResponse.bodyToMono(String.class)
-                        .defaultIfEmpty("Sin mensaje")
-                        .map(body -> new ExternalServiceException(
-                            "Error Cats API: "
-                            + clientResponse.statusCode()
-                            + " - " + body
-                        ))
-                )
-                .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
-                .block();
-
-        if (response == null) {
-            throw new ExternalServiceException("Respuesta vacía de Cats");
-        }
-
-        return response.stream()
-                .map(p -> PokemonResponse.builder()
-                        .name((String) p.get("name"))
-                        .build())
-                .toList();
-    }
+    return response.stream()
+      .map(p -> PokemonResponse.builder()
+        .name((String) p.get("name"))
+        .build())
+      .toList();
+  }
 }

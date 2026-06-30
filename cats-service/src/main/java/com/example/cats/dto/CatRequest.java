@@ -19,28 +19,28 @@ import lombok.Setter;
 @Schema(description = "Request object for creating or updating a cat")
 public class CatRequest {
 
-    @Schema(
-        description = "Name of the cat",
-        example = "Milo"
-    )
-    @NotBlank(message = "Name is required")
-    private String name;
+  @Schema(
+    description = "Name of the cat",
+    example = "Milo"
+  )
+  @NotBlank(message = "Name is required")
+  private String name;
 
-    @Schema(
-        description = "Color of the cat",
-        example = "Black"
-    )
-    @NotBlank(message = "Color is required")
-    private String color;
+  @Schema(
+    description = "Color of the cat",
+    example = "Black"
+  )
+  @NotBlank(message = "Color is required")
+  private String color;
 
-    @Schema(
-        description = "Age of the cat",
-        example = "3",
-        minimum = "0",
-        maximum = "25"
-    )
-    @NotNull
-    @Min(value = 0, message = "Age must be positive")
-    @Max(value = 25, message = "Age seems too high")
-    private Integer age;
+  @Schema(
+    description = "Age of the cat",
+    example = "3",
+    minimum = "0",
+    maximum = "25"
+  )
+  @NotNull
+  @Min(value = 0, message = "Age must be positive")
+  @Max(value = 25, message = "Age seems too high")
+  private Integer age;
 }

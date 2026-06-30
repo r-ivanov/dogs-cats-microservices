@@ -15,27 +15,27 @@ import lombok.Setter;
 @Schema(description = "Response object representing a dog")
 public class DogResponse {
 
-    @Schema(
-        description = "Unique identifier of the dog",
-        example = "1"
-    )
-    private Long id;
+  @Schema(
+    description = "Unique identifier of the dog",
+    example = "1"
+  )
+  private Long id;
 
-    @Schema(
-        description = "Name of the dog",
-        example = "Rocky"
-    )
-    private String name;
+  @Schema(
+    description = "Name of the dog",
+    example = "Rocky"
+  )
+  private String name;
 
-    @Schema(
-        description = "Breed of the dog",
-        example = "Bulldog"
-    )
-    private String breed;
+  @Schema(
+    description = "Breed of the dog",
+    example = "Bulldog"
+  )
+  private String breed;
 
-    @Schema(
-        description = "Age of the dog",
-        example = "5"
-    )
-    private Integer age;
+  @Schema(
+    description = "Age of the dog",
+    example = "5"
+  )
+  private Integer age;
 }

@@ -15,15 +15,15 @@ import lombok.Setter;
 @Schema(description = "Response object representing a joke")
 public class JokeResponse {
 
-    @Schema(
-        description = "Type of joke (single or twopart)",
-        example = "single"
-    )
-    private String type;
+  @Schema(
+    description = "Type of joke (single or twopart)",
+    example = "single"
+  )
+  private String type;
 
-    @Schema(
-        description = "Content of the joke",
-        example = "Why do programmers prefer dark mode? Because light attracts bugs."
-    )
-    private String content;
+  @Schema(
+    description = "Content of the joke",
+    example = "Why do programmers prefer dark mode? Because light attracts bugs."
+  )
+  private String content;
 }

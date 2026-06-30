@@ -10,8 +10,8 @@ import com.example.dogs.dto.DogResponse;
 @Mapper(componentModel = "spring")
 public interface DogMapper {
 
-	@Mapping(target = "id", ignore = true)
-    Dog toEntity(DogRequest request);
+  @Mapping(target = "id", ignore = true)
+  Dog toEntity(DogRequest request);
 
-    DogResponse toResponse(Dog dog);
+  DogResponse toResponse(Dog dog);
 }

@@ -82,7 +82,7 @@ class DogServiceTest {
     List<DogResponse> result = service.getAll();
     assertTrue(result.isEmpty());
   }
-  
+
   @Test
   void getAll_shouldReturnMappedList_multipleElements() {
 
@@ -219,17 +219,17 @@ class DogServiceTest {
   void update_shouldUpdateDog_whenExists() {
 
     DogRequest request = DogRequest.builder()
-            .name("NewName")
-            .breed("NewBreed")
-            .age(3)
-            .build();
+      .name("NewName")
+      .breed("NewBreed")
+      .age(3)
+      .build();
 
     DogResponse response = DogResponse.builder()
-            .id(1L)
-            .name("NewName")
-            .breed("NewBreed")
-            .age(3)
-            .build();
+      .id(1L)
+      .name("NewName")
+      .breed("NewBreed")
+      .age(3)
+      .build();
 
     when(repository.findById(1L)).thenReturn(Optional.of(dog));
     when(repository.save(any(Dog.class))).thenReturn(dog);
@@ -251,8 +251,7 @@ class DogServiceTest {
 
     when(repository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class,
-      () -> service.update(1L, request));
+    assertThrows(ResourceNotFoundException.class, () -> service.update(1L, request));
   }
 
   @Test
@@ -268,8 +267,7 @@ class DogServiceTest {
 
     when(repository.existsById(1L)).thenReturn(false);
 
-    assertThrows(ResourceNotFoundException.class,
-      () -> service.delete(1L));
+    assertThrows(ResourceNotFoundException.class, () -> service.delete(1L));
   }
 
   @Test
@@ -326,8 +324,7 @@ class DogServiceTest {
   @Test
   void externalServiceException_shouldCreateCorrectly() {
 
-    ExternalServiceException ex =
-      new ExternalServiceException("Error externo");
+    ExternalServiceException ex = new ExternalServiceException("Error externo");
 
     assertEquals("Error externo", ex.getMessage());
   }

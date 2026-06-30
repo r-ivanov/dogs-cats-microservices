@@ -15,9 +15,9 @@ import lombok.Setter;
 @Schema(description = "Response object representing a Pokemon")
 public class PokemonResponse {
 
-    @Schema(
-        description = "Name of the pokemon",
-        example = "bulbasaur"
-    )
-    private String name;
+  @Schema(
+    description = "Name of the pokemon",
+    example = "bulbasaur"
+  )
+  private String name;
 }

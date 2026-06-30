@@ -11,8 +11,8 @@ import lombok.Setter;
 @Schema(description = "Wrapper object representing the response from the external Pokemon API")
 public class PokemonApiResponse {
 
-    @Schema(
-        description = "List of pokemons returned by the external API"
-    )
-    private List<PokemonResponse> results;
+  @Schema(
+    description = "List of pokemons returned by the external API"
+  )
+  private List<PokemonResponse> results;
 }

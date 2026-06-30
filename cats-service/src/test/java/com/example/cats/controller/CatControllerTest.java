@@ -181,19 +181,19 @@ class CatControllerTest {
     @Test
     void create_shouldReturn500_whenServiceFails() throws Exception {
 
-    	CatRequest request = CatRequest.builder()
+      CatRequest request = CatRequest.builder()
         .name("Milo")
         .color("Black")
         .age(3)
         .build();
 
-        when(service.create(any()))
-          .thenThrow(new RuntimeException("error"));
+      when(service.create(any()))
+        .thenThrow(new RuntimeException("error"));
 
-        mockMvc.perform(post("/api/cats")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(objectMapper.writeValueAsString(request)))
-          .andExpect(status().isInternalServerError());
+      mockMvc.perform(post("/api/cats")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isInternalServerError());
     }
 
     @Test

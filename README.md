@@ -105,7 +105,7 @@ mvn clean test
 
 ### Cobertura
 
-Cobertura total: 82%
+Cobertura total: 83%
 Herramienta: JaCoCo
 
 Informe generado en:

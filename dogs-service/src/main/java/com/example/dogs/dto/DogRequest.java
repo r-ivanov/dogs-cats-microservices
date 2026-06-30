@@ -19,28 +19,28 @@ import lombok.Setter;
 @Schema(description = "Request object for creating or updating a dog")
 public class DogRequest {
 
-    @Schema(
-        description = "Name of the dog",
-        example = "Rocky"
-    )
-    @NotBlank(message = "Name is required")
-    private String name;
+  @Schema(
+    description = "Name of the dog",
+    example = "Rocky"
+  )
+  @NotBlank(message = "Name is required")
+  private String name;
 
-    @Schema(
-        description = "Breed of the dog",
-        example = "Bulldog"
-    )
-    @NotBlank(message = "Breed is required")
-    private String breed;
+  @Schema(
+    description = "Breed of the dog",
+    example = "Bulldog"
+  )
+  @NotBlank(message = "Breed is required")
+  private String breed;
 
-    @Schema(
-        description = "Age of the dog",
-        example = "5",
-        minimum = "0",
-        maximum = "30"
-    )
-    @NotNull
-    @Min(value = 0, message = "Age must be positive")
-    @Max(value = 30, message = "Age seems too high")
-    private Integer age;
+  @Schema(
+    description = "Age of the dog",
+    example = "5",
+    minimum = "0",
+    maximum = "30"
+  )
+  @NotNull
+  @Min(value = 0, message = "Age must be positive")
+  @Max(value = 30, message = "Age seems too high")
+  private Integer age;
 }
