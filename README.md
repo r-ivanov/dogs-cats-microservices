@@ -60,7 +60,11 @@ http://dogs-service:8081
 ### Arranque
 
 ```bash
+cd dogs-service
 mvn clean package
+cd ../cats-service
+mvn clean package
+cd ..
 docker-compose up --build
 ```
 
@@ -68,12 +72,18 @@ docker-compose up --build
 Dogs Service
 
 Swagger: http://localhost:8081/swagger-ui.html
+
 H2: http://localhost:8081/h2-console
+JDBC URL: jdbc:h2:mem:catsdb
+User Name: sa
 
 Cats Service
 
 Swagger: http://localhost:8082/swagger-ui.html
+
 H2: http://localhost:8082/h2-console
+JDBC URL: jdbc:h2:mem:dogsdb
+User Name: sa
 
 ### Testing
 El proyecto incluye:
@@ -87,7 +97,10 @@ El proyecto incluye:
 Ejecutar tests:
 
 ```bash
+cd dogs-service
 mvn clean test
+cd ../cats-service
+mvn clean package
 ```
 
 ### Cobertura
