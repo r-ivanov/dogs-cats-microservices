@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -327,5 +328,47 @@ class DogServiceTest {
     ExternalServiceException ex = new ExternalServiceException("Error externo");
 
     assertEquals("Error externo", ex.getMessage());
+  }
+
+  @Test
+  void uploadPhoto_shouldThrowException_whenDogNotFound() {
+
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "photo.jpg",
+      "image/jpeg",
+      "test".getBytes());
+
+    when(repository.findById(1L))
+      .thenReturn(Optional.empty());
+
+    assertThrows(ResourceNotFoundException.class, () -> service.uploadPhoto(1L, file));
+  }
+
+  @Test
+  void uploadPhoto_shouldSavePhoto() {
+
+      MockMultipartFile file = new MockMultipartFile(
+        "file",
+        "photo.jpg",
+        "image/jpeg",
+        "test".getBytes());
+
+      DogResponse response = DogResponse.builder()
+        .id(1L)
+        .name("Rocky")
+        .build();
+
+      when(repository.findById(1L))
+        .thenReturn(Optional.of(dog));
+
+      when(mapper.toResponse(any(Dog.class)))
+        .thenReturn(response);
+
+      DogResponse result = service.uploadPhoto(1L, file);
+
+      assertNotNull(result);
+
+      verify(repository).save(any(Dog.class));
   }
 }

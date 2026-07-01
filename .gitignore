@@ -22,3 +22,7 @@ Thumbs.db
 
 # Docker
 *.tar
+
+# Imagenes subidas durante ejecución
+dogs-service/uploads/dogs/
+cats-service/uploads/cats/

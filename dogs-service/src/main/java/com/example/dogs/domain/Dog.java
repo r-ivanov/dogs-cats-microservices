@@ -33,4 +33,7 @@ public class Dog {
 
   @Column(nullable = false)
   private Integer age;
+
+  @Column(name = "photo_url")
+  private String photoUrl;
 }

@@ -11,6 +11,7 @@ import com.example.cats.dto.CatResponse;
 public interface CatMapper {
 
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "photoUrl", ignore = true)
   Cat toEntity(CatRequest request);
 
   CatResponse toResponse(Cat cat);

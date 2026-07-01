@@ -1,5 +1,10 @@
 package com.example.cats.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -7,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.cats.domain.Cat;
@@ -16,6 +22,7 @@ import com.example.cats.dto.JokeResponse;
 import com.example.cats.dto.PokemonResponse;
 import com.example.cats.dto.PokemonApiResponse;
 import com.example.cats.exception.ExternalServiceException;
+import com.example.cats.exception.PhotoStorageException;
 import com.example.cats.exception.ResourceNotFoundException;
 import com.example.cats.mapper.CatMapper;
 import com.example.cats.repository.CatRepository;
@@ -132,5 +139,41 @@ public class CatService {
     }
 
     return response.getResults();
+  }
+
+  public CatResponse uploadPhoto(Long id, MultipartFile file) {
+
+    Cat cat = repository.findById(id)
+      .orElseThrow(() -> new ResourceNotFoundException("Cat not found"));
+
+    try {
+
+      String originalFilename = file.getOriginalFilename();
+
+      String extension = originalFilename.substring(
+        originalFilename.lastIndexOf("."));
+
+      Path uploadDir = Paths.get("uploads/cats");
+
+      Files.createDirectories(uploadDir);
+
+      String filename = id + extension;
+
+      Path destination = uploadDir.resolve(filename);
+
+      Files.copy(
+        file.getInputStream(),
+        destination,
+        StandardCopyOption.REPLACE_EXISTING);
+
+      cat.setPhotoUrl("/photos/cats/" + filename);
+
+      repository.save(cat);
+
+      return mapper.toResponse(cat);
+
+    } catch (IOException e) {
+      throw new PhotoStorageException("Error saving photo", e);
+    }
   }
 }

@@ -38,4 +38,6 @@ public class CatResponse {
     example = "3"
   )
   private Integer age;
+  
+  private String photoUrl;
 }

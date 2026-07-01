@@ -3,6 +3,7 @@ package com.example.cats.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import com.example.cats.CatsServiceApplication;
 import com.example.cats.domain.Cat;
 import com.example.cats.dto.*;
 import com.example.cats.exception.ExternalServiceException;
+import com.example.cats.exception.PhotoStorageException;
 import com.example.cats.exception.ResourceNotFoundException;
 import com.example.cats.mapper.CatMapper;
 import com.example.cats.repository.CatRepository;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -412,7 +415,56 @@ class CatServiceTest {
   }
 
   @Test
-  void main_shouldRun() {
-    CatsServiceApplication.main(new String[] {});
+  void uploadPhoto_shouldThrowException_whenCatNotFound() {
+
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "photo.jpg",
+      "image/jpeg",
+      "test".getBytes());
+
+    when(repository.findById(1L))
+      .thenReturn(Optional.empty());
+
+    assertThrows(ResourceNotFoundException.class, () -> service.uploadPhoto(1L, file));
+  }
+
+  @Test
+  void uploadPhoto_shouldSavePhoto() {
+
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "photo.jpg",
+      "image/jpeg",
+      "test".getBytes());
+
+    CatResponse response = CatResponse.builder()
+      .id(1L)
+      .name("Tom")
+      .build();
+
+    when(repository.findById(1L))
+      .thenReturn(Optional.of(cat));
+
+    when(mapper.toResponse(any(Cat.class)))
+      .thenReturn(response);
+
+    CatResponse result = service.uploadPhoto(1L, file);
+
+    assertNotNull(result);
+
+    verify(repository).save(any(Cat.class));
+  }
+
+  @Test
+  void photoStorageException_shouldCreateCorrectly() {
+
+    IOException cause = new IOException("Disk error");
+
+    PhotoStorageException ex =
+      new PhotoStorageException("Error saving photo", cause);
+
+    assertEquals("Error saving photo", ex.getMessage());
+    assertEquals(cause, ex.getCause());
   }
 }

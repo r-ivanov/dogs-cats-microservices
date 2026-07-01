@@ -38,4 +38,6 @@ public class DogResponse {
     example = "5"
   )
   private Integer age;
+  
+  private String photoUrl;
 }

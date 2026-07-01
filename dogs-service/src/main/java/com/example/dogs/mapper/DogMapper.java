@@ -11,6 +11,7 @@ import com.example.dogs.dto.DogResponse;
 public interface DogMapper {
 
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "photoUrl", ignore = true)
   Dog toEntity(DogRequest request);
 
   DogResponse toResponse(Dog dog);

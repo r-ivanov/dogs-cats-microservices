@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 
 import com.example.cats.dto.CatRequest;
@@ -272,6 +274,46 @@ public class CatController {
   public List<PokemonResponse> getPokemons(
     @Parameter(description = "Number of pokemons to retrieve", example = "100")
     @RequestParam(name = "limit", defaultValue = "100") @Min(1) @Max(200) int limit) {
+
     return service.getPokemons(limit);
+  }
+
+  @Operation(
+    summary = "Upload cat photo",
+    description = "Uploads a photo for an existing cat and updates its photoUrl"
+  )
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "200",
+      description = "Photo uploaded successfully",
+      content = @Content(
+        schema = @Schema(implementation = CatResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Cat not found",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "500",
+      description = "Error saving photo",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class)
+      )
+    )
+  })
+  @PostMapping(
+    value = "/{id}/photo",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<CatResponse> uploadPhoto(
+      @PathVariable Long id,
+      @RequestParam("file") MultipartFile file) {
+
+    CatResponse response = service.uploadPhoto(id, file);
+
+    return ResponseEntity.ok(response);
   }
 }

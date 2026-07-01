@@ -26,11 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class DogControllerTest {
 
   @Autowired
@@ -345,5 +349,33 @@ class DogControllerTest {
       .build();
 
     assertEquals(404, error.getStatus());
+  }
+
+  @Test
+  void uploadPhoto_shouldReturn200() throws Exception {
+
+    DogResponse response = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .breed("Bulldog")
+      .age(5)
+      .photoUrl("/photos/dogs/1.jpg")
+      .build();
+
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "photo.jpg",
+      "image/jpeg",
+      "fake-image".getBytes());
+
+    when(service.uploadPhoto(eq(1L), any(MultipartFile.class)))
+      .thenReturn(response);
+
+    mockMvc.perform(
+      multipart("/api/dogs/1/photo")
+        .file(file))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.photoUrl")
+        .value("/photos/dogs/1.jpg"));
   }
 }
