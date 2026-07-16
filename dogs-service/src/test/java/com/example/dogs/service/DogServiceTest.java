@@ -10,11 +10,14 @@ import java.util.Optional;
 import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
 import com.example.dogs.dto.JokeResponse;
+import com.example.dogs.dto.JokeApiResponse;
 import com.example.dogs.dto.PokemonResponse;
+import com.example.dogs.client.JokeApiClient;
 import com.example.dogs.domain.Dog;
 import com.example.dogs.exception.ExternalServiceException;
 import com.example.dogs.exception.ResourceNotFoundException;
 import com.example.dogs.mapper.DogMapper;
+import com.example.dogs.mapper.JokeMapper;
 import com.example.dogs.repository.DogRepository;
 
 import reactor.core.publisher.Mono;
@@ -39,10 +42,14 @@ class DogServiceTest {
   private DogService service;
 
   @Mock
-  private DogMapper mapper;
+  private DogMapper dogMapper;
+  @Mock
+  private JokeMapper jokeMapper;
 
   @Mock
   private WebClient webClient;
+  @Mock
+  private JokeApiClient jokeApiClient;
 
   private Dog dog;
 
@@ -66,7 +73,7 @@ class DogServiceTest {
       .build();
 
     when(repository.findAll()).thenReturn(List.of(dog));
-    when(mapper.toResponse(dog)).thenReturn(response);
+    when(dogMapper.toResponse(dog)).thenReturn(response);
 
     List<DogResponse> result = service.getAll();
 
@@ -108,8 +115,8 @@ class DogServiceTest {
       .build();
 
     when(repository.findAll()).thenReturn(List.of(dog, dog2));
-    when(mapper.toResponse(dog)).thenReturn(response1);
-    when(mapper.toResponse(dog2)).thenReturn(response2);
+    when(dogMapper.toResponse(dog)).thenReturn(response1);
+    when(dogMapper.toResponse(dog2)).thenReturn(response2);
 
     List<DogResponse> result = service.getAll();
 
@@ -127,7 +134,7 @@ class DogServiceTest {
       .build();
 
     when(repository.findById(1L)).thenReturn(Optional.of(dog));
-    when(mapper.toResponse(dog)).thenReturn(response);
+    when(dogMapper.toResponse(dog)).thenReturn(response);
 
     DogResponse result = service.getById(1L);
 
@@ -165,9 +172,9 @@ class DogServiceTest {
       .age(5)
       .build();
 
-    when(mapper.toEntity(request)).thenReturn(dog);
+    when(dogMapper.toEntity(request)).thenReturn(dog);
     when(repository.save(dog)).thenReturn(dog);
-    when(mapper.toResponse(dog)).thenReturn(response);
+    when(dogMapper.toResponse(dog)).thenReturn(response);
 
     DogResponse result = service.create(request);
 
@@ -183,15 +190,15 @@ class DogServiceTest {
       .age(2)
       .build();
 
-    when(mapper.toEntity(request)).thenReturn(dog);
+    when(dogMapper.toEntity(request)).thenReturn(dog);
     when(repository.save(dog)).thenReturn(dog);
-    when(mapper.toResponse(dog)).thenReturn(
+    when(dogMapper.toResponse(dog)).thenReturn(
       DogResponse.builder().name("Test").build()
     );
 
     service.create(request);
 
-    verify(mapper).toEntity(request);
+    verify(dogMapper).toEntity(request);
   }
 
   @Test
@@ -207,9 +214,9 @@ class DogServiceTest {
       .name("Test")
       .build();
 
-    when(mapper.toEntity(request)).thenReturn(dog);
+    when(dogMapper.toEntity(request)).thenReturn(dog);
     when(repository.save(dog)).thenReturn(dog);
-    when(mapper.toResponse(dog)).thenReturn(response);
+    when(dogMapper.toResponse(dog)).thenReturn(response);
 
     DogResponse result = service.create(request);
 
@@ -234,7 +241,7 @@ class DogServiceTest {
 
     when(repository.findById(1L)).thenReturn(Optional.of(dog));
     when(repository.save(any(Dog.class))).thenReturn(dog);
-    when(mapper.toResponse(dog)).thenReturn(response);
+    when(dogMapper.toResponse(dog)).thenReturn(response);
 
     DogResponse result = service.update(1L, request);
 
@@ -293,33 +300,35 @@ class DogServiceTest {
     List<PokemonResponse> result = service.getPokemons(1);
 
     assertEquals(1, result.size());
-    assertEquals("Pikachu", result.get(0).getName());
+    assertEquals("Pikachu", result.get(0).name());
   }
 
   @Test
   void getJoke_shouldReturnSingleJoke() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+    JokeApiResponse mockResponse =
+      new JokeApiResponse(
+        "single",
+        "Funny joke",
+        null,
+        null
+      );
 
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(anyString())).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    when(jokeApiClient.getRandomJoke())
+      .thenReturn(mockResponse);
 
-    Map<String, Object> mockResponse = Map.of(
-      "type", "single",
-      "joke", "Funny joke"
-    );
-
-    when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
-      .thenReturn((Mono) Mono.just(mockResponse));
+    when(jokeMapper.toJokeResponse(mockResponse))
+      .thenReturn(
+        new JokeResponse(
+            "single",
+            "Funny joke"
+        )
+      );
 
     JokeResponse result = service.getJoke();
 
-    assertEquals("single", result.getType());
-    assertEquals("Funny joke", result.getContent());
+    assertEquals("single", result.type());
+    assertEquals("Funny joke", result.content());
   }
 
   @Test
@@ -362,7 +371,7 @@ class DogServiceTest {
       when(repository.findById(1L))
         .thenReturn(Optional.of(dog));
 
-      when(mapper.toResponse(any(Dog.class)))
+      when(dogMapper.toResponse(any(Dog.class)))
         .thenReturn(response);
 
       DogResponse result = service.uploadPhoto(1L, file);

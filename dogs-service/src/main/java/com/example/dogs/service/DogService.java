@@ -17,15 +17,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.dogs.client.JokeApiClient;
 import com.example.dogs.domain.Dog;
 import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
+import com.example.dogs.dto.JokeApiResponse;
 import com.example.dogs.dto.JokeResponse;
 import com.example.dogs.dto.PokemonResponse;
 import com.example.dogs.exception.ExternalServiceException;
 import com.example.dogs.exception.PhotoStorageException;
 import com.example.dogs.exception.ResourceNotFoundException;
 import com.example.dogs.mapper.DogMapper;
+import com.example.dogs.mapper.JokeMapper;
 import com.example.dogs.repository.DogRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -36,7 +39,9 @@ public class DogService {
 
   private final DogRepository repository;
   private final DogMapper mapper;
+  private final JokeMapper jokeMapper;
   private final WebClient webClient;
+  private final JokeApiClient jokeApiClient;
 
   @Value("${services.cats.url}")
   private String catsServiceUrl;
@@ -90,39 +95,9 @@ public class DogService {
 
   public JokeResponse getJoke() {
 
-    Map<String, Object> response = webClient.get()
-      .uri("https://v2.jokeapi.dev/joke/Any?lang=es")
-      .retrieve()
-      .onStatus(
-        status -> status.isError(),
-        clientResponse -> clientResponse.bodyToMono(String.class)
-          .defaultIfEmpty("Sin mensaje")
-          .map(body -> new ExternalServiceException(
-            "Error API externa: "
-            + clientResponse.statusCode()
-            + " - " + body
-          )))
-      .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-      .block();
+    JokeApiResponse response = jokeApiClient.getRandomJoke();
 
-    if (response == null) {
-      throw new RuntimeException("Error calling Joke API");
-    }
-
-    String type = (String) response.get("type");
-
-    String content;
-
-    if ("single".equals(type)) {
-      content = (String) response.get("joke");
-    } else {
-      content = response.get("setup") + " - " + response.get("delivery");
-    }
-
-    return JokeResponse.builder()
-      .type(type)
-      .content(content)
-      .build();
+    return jokeMapper.toJokeResponse(response);
   }
 
   public List<PokemonResponse> getPokemons(int limit) {
@@ -147,9 +122,9 @@ public class DogService {
     }
 
     return response.stream()
-      .map(p -> PokemonResponse.builder()
-        .name((String) p.get("name"))
-        .build())
+      .map(p -> new PokemonResponse(
+        (String) p.get("name")
+      ))
       .toList();
   }
 

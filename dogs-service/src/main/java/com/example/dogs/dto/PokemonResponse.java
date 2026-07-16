@@ -7,17 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Schema(description = "Response object representing a Pokemon")
-public class PokemonResponse {
+public record PokemonResponse(
 
   @Schema(
     description = "Name of the pokemon",
     example = "bulbasaur"
   )
-  private String name;
+  String name
+
+) {
 }

@@ -4,18 +4,20 @@ services:
       - dogs-data:/data
     build: ./dogs-service
     ports:
-      - "8081:8081"
+      - "${DOGS_PORT}:${DOGS_PORT}"
     environment:
-      - SERVER_PORT=8081
+      - SERVER_PORT=${DOGS_PORT}
+      - CATS_SERVICE_URL=${CATS_SERVICE_URL}
 
   cats-service:
     volumes:
       - cats-data:/data
     build: ./cats-service
     ports:
-      - "8082:8082"
+      - "${CATS_PORT}:${CATS_PORT}"
     environment:
-      - SERVER_PORT=8082
+      - SERVER_PORT=${CATS_PORT}
+      - DOGS_SERVICE_URL=${DOGS_SERVICE_URL}
 
 volumes:
   dogs-data:

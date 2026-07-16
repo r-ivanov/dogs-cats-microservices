@@ -267,10 +267,10 @@ class DogControllerTest {
   @Test
   void getJoke_shouldReturnJoke() throws Exception {
 
-    JokeResponse response = JokeResponse.builder()
-      .type("single")
-      .content("Funny joke")
-      .build();
+    JokeResponse response = new JokeResponse(
+      "single",
+      "Funny joke"
+    );
 
     when(service.getJoke()).thenReturn(response);
 
@@ -292,8 +292,7 @@ class DogControllerTest {
   @Test
   void getPokemons_shouldReturnList() throws Exception {
 
-    PokemonResponse pokemon = new PokemonResponse();
-    pokemon.setName("pikachu");
+    PokemonResponse pokemon = new PokemonResponse("pikachu");
 
     when(service.getPokemons(10)).thenReturn(List.of(pokemon));
 

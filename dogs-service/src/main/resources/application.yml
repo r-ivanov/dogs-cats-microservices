@@ -25,4 +25,4 @@ server:
 
 services:
   cats:
-    url: http://cats-service:8082
+    url: ${CATS_SERVICE_URL:http://cats-service:8082}

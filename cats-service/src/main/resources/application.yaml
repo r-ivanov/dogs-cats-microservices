@@ -24,4 +24,4 @@ server:
 
 services:
   dogs:
-    url: http://dogs-service:8081
+    url: ${DOGS_SERVICE_URL:http://dogs-service:8081}
