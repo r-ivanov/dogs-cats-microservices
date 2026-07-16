@@ -48,12 +48,12 @@ class DogControllerTest {
   @Test
   void getAll_shouldReturnDogs() throws Exception {
 
-    DogResponse dog = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogResponse dog = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
     when(service.getAll()).thenReturn(List.of(dog));
 
@@ -65,12 +65,12 @@ class DogControllerTest {
   @Test
   void getById_shouldReturnDog() throws Exception {
 
-    DogResponse dog = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogResponse dog = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
     when(service.getById(1L)).thenReturn(dog);
 
@@ -92,18 +92,18 @@ class DogControllerTest {
   @Test
   void create_shouldReturn201_whenValid() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogRequest request = new DogRequest(
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
     when(service.create(any(DogRequest.class))).thenReturn(response);
 
@@ -126,11 +126,11 @@ class DogControllerTest {
   @Test
   void create_shouldReturn400_whenNameBlank() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("")     // inválido
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogRequest request = new DogRequest(
+      "", // invalido
+      "Bulldog",
+      5
+    );
 
     mockMvc.perform(post("/api/dogs")
       .contentType(MediaType.APPLICATION_JSON)
@@ -141,11 +141,11 @@ class DogControllerTest {
   @Test
   void create_shouldReturn400_whenAgeNegative() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(-1)
-      .build();
+    DogRequest request = new DogRequest(
+      "Rocky",
+      "Bulldog",
+      -1
+    );
 
     mockMvc.perform(post("/api/dogs")
       .contentType(MediaType.APPLICATION_JSON)
@@ -156,11 +156,11 @@ class DogControllerTest {
   @Test
   void create_shouldReturn400_whenAgeTooHigh() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(50)
-      .build();
+    DogRequest request = new DogRequest(
+      "Rocky",
+      "Bulldog",
+      50
+    );
 
     mockMvc.perform(post("/api/dogs")
       .contentType(MediaType.APPLICATION_JSON)
@@ -171,11 +171,11 @@ class DogControllerTest {
   @Test
   void create_shouldReturnValidationMessage() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("")   // fuerza error
-      .breed("")  // fuerza error
-      .age(-1)    // fuerza error
-      .build();
+    DogRequest request = new DogRequest(
+      "", // fuerza error
+      "", // fuerza error
+      -1  // fuerza error
+    );
 
     mockMvc.perform(post("/api/dogs")
       .contentType(MediaType.APPLICATION_JSON)
@@ -188,11 +188,11 @@ class DogControllerTest {
   @Test
   void create_shouldReturn500_whenServiceFails() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogRequest request = new DogRequest(
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
     when(service.create(any()))
       .thenThrow(new RuntimeException("error"));
@@ -206,18 +206,18 @@ class DogControllerTest {
   @Test
   void update_shouldReturnUpdatedDog() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("NewName")
-      .breed("White")
-      .age(2)
-      .build();
+    DogRequest request = new DogRequest(
+      "NewName",
+      "White",
+      2
+    );
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("NewName")
-      .breed("White")
-      .age(2)
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "NewName",
+      "White",
+      2
+    );
 
     when(service.update(eq(1L), any(DogRequest.class)))
       .thenReturn(response);
@@ -232,11 +232,11 @@ class DogControllerTest {
   @Test
   void update_shouldReturn404_whenNotFound() throws Exception {
 
-    DogRequest request = DogRequest.builder()
-      .name("Test")
-      .breed("Husky")
-      .age(2)
-      .build();
+    DogRequest request = new DogRequest(
+      "Test",
+      "Husky",
+      2
+    );
 
     when(service.update(eq(1L), any(DogRequest.class)))
       .thenThrow(new ResourceNotFoundException("Not found"));
@@ -353,13 +353,13 @@ class DogControllerTest {
   @Test
   void uploadPhoto_shouldReturn200() throws Exception {
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .photoUrl("/photos/dogs/1.jpg")
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      5,
+      "/photos/dogs/1.jpg"
+    );
 
     MockMultipartFile file = new MockMultipartFile(
       "file",

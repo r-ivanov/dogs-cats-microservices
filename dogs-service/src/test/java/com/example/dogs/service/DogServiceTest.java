@@ -67,12 +67,13 @@ class DogServiceTest {
   @Test
   void getAll_shouldReturnDogs() {
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      5,
+      "/photos/dogs/1.jpg"
+    );
 
     when(repository.findAll()).thenReturn(List.of(dog));
     when(dogMapper.toResponse(dog)).thenReturn(response);
@@ -80,7 +81,7 @@ class DogServiceTest {
     List<DogResponse> result = service.getAll();
 
     assertEquals(1, result.size());
-    assertEquals("Rocky", result.get(0).getName());
+    assertEquals("Rocky", result.get(0).name());
 
     verify(repository).findAll();
   }
@@ -102,19 +103,19 @@ class DogServiceTest {
     dog2.setBreed("Husky");
     dog2.setAge(2);
 
-    DogResponse response1 = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(3)
-      .build();
+    DogResponse response1 = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      3
+    );
 
-    DogResponse response2 = DogResponse.builder()
-      .id(2L)
-      .name("Roket")
-      .breed("Husky")
-      .age(2)
-      .build();
+    DogResponse response2 = new DogResponse(
+      2L,
+      "Roket",
+      "Husky",
+      2
+    );
 
     when(repository.findAll()).thenReturn(List.of(dog, dog2));
     when(dogMapper.toResponse(dog)).thenReturn(response1);
@@ -128,19 +129,19 @@ class DogServiceTest {
   @Test
   void getById_shouldReturnDog_whenExists() {
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
     when(repository.findById(1L)).thenReturn(Optional.of(dog));
     when(dogMapper.toResponse(dog)).thenReturn(response);
 
     DogResponse result = service.getById(1L);
 
-    assertEquals("Rocky", result.getName());
+    assertEquals("Rocky", result.name());
 
     verify(repository).findById(1L);
   }
@@ -158,21 +159,21 @@ class DogServiceTest {
   @Test
   void create_shouldSaveDog() {
 
-    DogRequest request = DogRequest.builder()
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogRequest request = new DogRequest(
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
     Dog dog = new Dog();
     dog.setId(1L);
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .breed("Bulldog")
-      .age(5)
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "Rocky",
+      "Bulldog",
+      5
+    );
 
     when(dogMapper.toEntity(request)).thenReturn(dog);
     when(repository.save(dog)).thenReturn(dog);
@@ -180,22 +181,27 @@ class DogServiceTest {
 
     DogResponse result = service.create(request);
 
-    assertEquals("Rocky", result.getName());
+    assertEquals("Rocky", result.name());
   }
 
   @Test
   void create_shouldCallMapper() {
 
-    DogRequest request = DogRequest.builder()
-      .name("Test")
-      .breed("Husky")
-      .age(2)
-      .build();
+    DogRequest request = new DogRequest(
+      "Test",
+      "Husky",
+      2
+    );
 
     when(dogMapper.toEntity(request)).thenReturn(dog);
     when(repository.save(dog)).thenReturn(dog);
     when(dogMapper.toResponse(dog)).thenReturn(
-      DogResponse.builder().name("Test").build()
+      new DogResponse(
+        null,
+        "Test",
+        null,
+        null
+      )
     );
 
     service.create(request);
@@ -206,15 +212,18 @@ class DogServiceTest {
   @Test
   void create_shouldHandleMapping() {
 
-    DogRequest request = DogRequest.builder()
-      .name("Test")
-      .breed("Test")
-      .age(1)
-      .build();
+    DogRequest request = new DogRequest(
+      "Test",
+      "Test",
+      1
+    );
 
-    DogResponse response = DogResponse.builder()
-      .name("Test")
-      .build();
+    DogResponse response = new DogResponse(
+        null,
+        "Test",
+        null,
+        null
+    );
 
     when(dogMapper.toEntity(request)).thenReturn(dog);
     when(repository.save(dog)).thenReturn(dog);
@@ -228,18 +237,18 @@ class DogServiceTest {
   @Test
   void update_shouldUpdateDog_whenExists() {
 
-    DogRequest request = DogRequest.builder()
-      .name("NewName")
-      .breed("NewBreed")
-      .age(3)
-      .build();
+    DogRequest request = new DogRequest(
+      "NewName",
+      "NewName",
+      3
+    );
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("NewName")
-      .breed("NewBreed")
-      .age(3)
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "NewName",
+      "NewBreed",
+      3
+    );
 
     when(repository.findById(1L)).thenReturn(Optional.of(dog));
     when(repository.save(any(Dog.class))).thenReturn(dog);
@@ -247,17 +256,17 @@ class DogServiceTest {
 
     DogResponse result = service.update(1L, request);
 
-    assertEquals("NewName", result.getName());
+    assertEquals("NewName", result.name());
   }
 
   @Test
   void update_shouldThrowException_whenNotFound() {
 
-    DogRequest request = DogRequest.builder()
-      .name("Test")
-      .breed("Test")
-      .age(2)
-      .build();
+    DogRequest request = new DogRequest(
+      "Test",
+      "Test",
+      2
+    );
 
     when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -356,10 +365,12 @@ class DogServiceTest {
       "image/jpeg",
       "test".getBytes());
 
-    DogResponse response = DogResponse.builder()
-      .id(1L)
-      .name("Rocky")
-      .build();
+    DogResponse response = new DogResponse(
+      1L,
+      "Rocky",
+      null,
+      null
+    );
 
     when(repository.findById(1L))
       .thenReturn(Optional.of(dog));

@@ -71,9 +71,9 @@ public class DogService {
     Dog dog = repository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
 
-    dog.setName(request.getName());
-    dog.setBreed(request.getBreed());
-    dog.setAge(request.getAge());
+    dog.setName(request.name());
+    dog.setBreed(request.breed());
+    dog.setAge(request.age());
 
     return mapper.toResponse(repository.save(dog));
   }
