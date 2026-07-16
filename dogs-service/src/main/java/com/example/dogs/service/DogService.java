@@ -6,17 +6,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClient;
-
 import com.example.dogs.client.CatsClient;
 import com.example.dogs.client.JokeApiClient;
 import com.example.dogs.domain.Dog;
@@ -26,7 +21,6 @@ import com.example.dogs.dto.JokeApiResponse;
 import com.example.dogs.dto.JokeResponse;
 import com.example.dogs.dto.PokemonApiResponse;
 import com.example.dogs.dto.PokemonResponse;
-import com.example.dogs.exception.ExternalServiceException;
 import com.example.dogs.exception.PhotoStorageException;
 import com.example.dogs.exception.ResourceNotFoundException;
 import com.example.dogs.mapper.DogMapper;

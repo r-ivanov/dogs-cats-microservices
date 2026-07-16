@@ -11,5 +11,4 @@ class DogsServiceApplicationTests {
   @Test
   void contextLoads() {
   }
-
 }

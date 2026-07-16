@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.example.dogs.dto.DogRequest;
@@ -17,21 +16,18 @@ import com.example.dogs.client.CatsClient;
 import com.example.dogs.client.JokeApiClient;
 import com.example.dogs.domain.Dog;
 import com.example.dogs.exception.ExternalServiceException;
+import com.example.dogs.exception.PhotoStorageException;
 import com.example.dogs.exception.ResourceNotFoundException;
 import com.example.dogs.mapper.DogMapper;
 import com.example.dogs.mapper.JokeMapper;
 import com.example.dogs.repository.DogRepository;
 
-import reactor.core.publisher.Mono;
-
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -354,27 +350,39 @@ class DogServiceTest {
   @Test
   void uploadPhoto_shouldSavePhoto() {
 
-      MockMultipartFile file = new MockMultipartFile(
-        "file",
-        "photo.jpg",
-        "image/jpeg",
-        "test".getBytes());
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "photo.jpg",
+      "image/jpeg",
+      "test".getBytes());
 
-      DogResponse response = DogResponse.builder()
-        .id(1L)
-        .name("Rocky")
-        .build();
+    DogResponse response = DogResponse.builder()
+      .id(1L)
+      .name("Rocky")
+      .build();
 
-      when(repository.findById(1L))
-        .thenReturn(Optional.of(dog));
+    when(repository.findById(1L))
+      .thenReturn(Optional.of(dog));
 
-      when(dogMapper.toResponse(any(Dog.class)))
-        .thenReturn(response);
+    when(dogMapper.toResponse(any(Dog.class)))
+      .thenReturn(response);
 
-      DogResponse result = service.uploadPhoto(1L, file);
+    DogResponse result = service.uploadPhoto(1L, file);
 
-      assertNotNull(result);
+    assertNotNull(result);
 
-      verify(repository).save(any(Dog.class));
+    verify(repository).save(any(Dog.class));
+  }
+
+  @Test
+  void photoStorageException_shouldKeepCause() {
+    RuntimeException cause =
+      new RuntimeException("boom");
+
+    PhotoStorageException ex =
+      new PhotoStorageException("error", cause);
+
+    assertEquals("error", ex.getMessage());
+    assertEquals(cause, ex.getCause());
   }
 }

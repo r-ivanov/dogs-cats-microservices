@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.cats.CatsServiceApplication;
 import com.example.cats.domain.Cat;
 import com.example.cats.dto.*;
 import com.example.cats.exception.ExternalServiceException;
