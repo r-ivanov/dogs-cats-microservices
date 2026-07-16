@@ -17,12 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.dogs.client.CatsClient;
 import com.example.dogs.client.JokeApiClient;
 import com.example.dogs.domain.Dog;
 import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
 import com.example.dogs.dto.JokeApiResponse;
 import com.example.dogs.dto.JokeResponse;
+import com.example.dogs.dto.PokemonApiResponse;
 import com.example.dogs.dto.PokemonResponse;
 import com.example.dogs.exception.ExternalServiceException;
 import com.example.dogs.exception.PhotoStorageException;
@@ -40,11 +42,8 @@ public class DogService {
   private final DogRepository repository;
   private final DogMapper mapper;
   private final JokeMapper jokeMapper;
-  private final WebClient webClient;
+  private final CatsClient catsClient;
   private final JokeApiClient jokeApiClient;
-
-  @Value("${services.cats.url}")
-  private String catsServiceUrl;
 
 
   @Cacheable("dogs")
@@ -102,28 +101,11 @@ public class DogService {
 
   public List<PokemonResponse> getPokemons(int limit) {
 
-    List<Map<String, Object>> response = webClient.get()
-      .uri(catsServiceUrl + "/api/cats/pokemons?limit={limit}", limit)
-      .retrieve()
-      .onStatus(
-        status -> status.isError(),
-        clientResponse -> clientResponse.bodyToMono(String.class)
-          .defaultIfEmpty("Sin mensaje")
-          .map(body -> new ExternalServiceException(
-            "Error Cats API: "
-            + clientResponse.statusCode()
-            + " - " + body
-          )))
-      .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
-      .block();
-
-    if (response == null) {
-      throw new ExternalServiceException("Respuesta vacía de Cats");
-    }
+    List<PokemonApiResponse> response = catsClient.getPokemons(limit);
 
     return response.stream()
       .map(p -> new PokemonResponse(
-        (String) p.get("name")
+        p.name()
       ))
       .toList();
   }

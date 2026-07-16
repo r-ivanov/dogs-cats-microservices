@@ -10,8 +10,10 @@ import java.util.Optional;
 import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
 import com.example.dogs.dto.JokeResponse;
+import com.example.dogs.dto.PokemonApiResponse;
 import com.example.dogs.dto.JokeApiResponse;
 import com.example.dogs.dto.PokemonResponse;
+import com.example.dogs.client.CatsClient;
 import com.example.dogs.client.JokeApiClient;
 import com.example.dogs.domain.Dog;
 import com.example.dogs.exception.ExternalServiceException;
@@ -22,6 +24,7 @@ import com.example.dogs.repository.DogRepository;
 
 import reactor.core.publisher.Mono;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +43,9 @@ class DogServiceTest {
 
   @InjectMocks
   private DogService service;
+  
+  @Mock
+  private CatsClient catsClient;
 
   @Mock
   private DogMapper dogMapper;
@@ -281,21 +287,12 @@ class DogServiceTest {
   @Test
   void getPokemons_shouldReturnList() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(anyString(), anyInt())).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-
-    List<Map<String, Object>> mockResponse = List.of(
-      Map.of("name", "Pikachu")
+    List<PokemonApiResponse> mockResponse = List.of(
+        new PokemonApiResponse("Pikachu")
     );
 
-    when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
-      .thenReturn((Mono) Mono.just(mockResponse));
+    when(catsClient.getPokemons(eq(1)))
+      .thenReturn(mockResponse);
 
     List<PokemonResponse> result = service.getPokemons(1);
 
