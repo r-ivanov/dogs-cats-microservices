@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.cats.client.DogsClient;
+import com.example.cats.client.PokemonApiClient;
 import com.example.cats.domain.Cat;
 import com.example.cats.dto.*;
 import com.example.cats.exception.ExternalServiceException;
@@ -38,6 +40,10 @@ class CatServiceTest {
 
   @Mock
   private WebClient webClient;
+  @Mock
+  private PokemonApiClient pokemonApiClient;
+  @Mock
+  private DogsClient dogsClient;
 
   private Cat cat;
 
@@ -53,12 +59,7 @@ class CatServiceTest {
   @Test
   void getAll_shouldReturnCats() {
 
-    CatResponse response = CatResponse.builder()
-      .id(1L)
-      .name("Milo")
-      .color("Black")
-      .age(3)
-      .build();
+    CatResponse response = new CatResponse(1L, "Milo", "Black", 3);
 
     when(repository.findAll()).thenReturn(List.of(cat));
     when(mapper.toResponse(cat)).thenReturn(response);
@@ -66,7 +67,7 @@ class CatServiceTest {
     List<CatResponse> result = service.getAll();
 
     assertEquals(1, result.size());
-    assertEquals("Milo", result.get(0).getName());
+    assertEquals("Milo", result.get(0).name());
 
     verify(repository).findAll();
   }
@@ -88,19 +89,9 @@ class CatServiceTest {
     cat2.setColor("White");
     cat2.setAge(2);
 
-    CatResponse response1 = CatResponse.builder()
-      .id(1L)
-      .name("Milo")
-      .color("Black")
-      .age(3)
-      .build();
+    CatResponse response1 = new CatResponse(1L, "Milo", "Black", 3);
 
-    CatResponse response2 = CatResponse.builder()
-      .id(2L)
-      .name("Luna")
-      .color("White")
-      .age(2)
-      .build();
+    CatResponse response2 = new CatResponse(2L, "Luna", "White", 2);
 
     when(repository.findAll()).thenReturn(List.of(cat, cat2));
     when(mapper.toResponse(cat)).thenReturn(response1);
@@ -114,19 +105,14 @@ class CatServiceTest {
   @Test
   void getById_shouldReturnCat_whenExists() {
 
-    CatResponse response = CatResponse.builder()
-      .id(1L)
-      .name("Milo")
-      .color("Black")
-      .age(3)
-      .build();
+    CatResponse response = new CatResponse(1L, "Milo", "Black", 3);
 
     when(repository.findById(1L)).thenReturn(Optional.of(cat));
     when(mapper.toResponse(cat)).thenReturn(response);
 
     CatResponse result = service.getById(1L);
 
-    assertEquals("Milo", result.getName());
+    assertEquals("Milo", result.name());
 
     verify(repository).findById(1L);
   }
@@ -144,21 +130,12 @@ class CatServiceTest {
   @Test
   void create_shouldSaveCat() {
 
-    CatRequest request = CatRequest.builder()
-      .name("Milo")
-      .color("Black")
-      .age(3)
-      .build();
+    CatRequest request = new CatRequest("Milo", "Black", 3);
 
     Cat cat = new Cat();
     cat.setId(1L);
 
-    CatResponse response = CatResponse.builder()
-      .id(1L)
-      .name("Milo")
-      .color("Black")
-      .age(3)
-      .build();
+    CatResponse response = new CatResponse(1L, "Milo", "Black", 3);
 
     when(mapper.toEntity(request)).thenReturn(cat);
     when(repository.save(cat)).thenReturn(cat);
@@ -166,22 +143,18 @@ class CatServiceTest {
 
     CatResponse result = service.create(request);
 
-    assertEquals("Milo", result.getName());
+    assertEquals("Milo", result.name());
   }
 
   @Test
   void create_shouldCallMapper() {
 
-    CatRequest request = CatRequest.builder()
-      .name("Test")
-      .color("Gray")
-      .age(2)
-      .build();
+    CatRequest request = new CatRequest("Test", "Gray", 2);
 
     when(mapper.toEntity(request)).thenReturn(cat);
     when(repository.save(cat)).thenReturn(cat);
     when(mapper.toResponse(cat)).thenReturn(
-      CatResponse.builder().name("Test").build()
+      new CatResponse(null, "Test", null, null)
     );
 
     service.create(request);
@@ -192,15 +165,9 @@ class CatServiceTest {
   @Test
   void create_shouldHandleMapping() {
 
-    CatRequest request = CatRequest.builder()
-      .name("Test")
-      .color("Black")
-      .age(2)
-      .build();
+    CatRequest request = new CatRequest("Test", "Black", 2);
 
-    CatResponse response = CatResponse.builder()
-      .name("Test")
-      .build();
+    CatResponse response = new CatResponse(null, "Test", null, null);
 
     when(mapper.toEntity(request)).thenReturn(cat);
     when(repository.save(cat)).thenReturn(cat);
@@ -214,18 +181,9 @@ class CatServiceTest {
   @Test
   void update_shouldUpdateCat_whenExists() {
 
-    CatRequest request = CatRequest.builder()
-            .name("NewName")
-            .color("White")
-            .age(2)
-            .build();
+    CatRequest request = new CatRequest("NewName", "White", 2);
 
-    CatResponse response = CatResponse.builder()
-            .id(1L)
-            .name("NewName")
-            .color("White")
-            .age(2)
-            .build();
+    CatResponse response = new CatResponse(1L, "NewName", "White", 2);
 
     when(repository.findById(1L)).thenReturn(Optional.of(cat));
     when(repository.save(any(Cat.class))).thenReturn(cat);
@@ -233,17 +191,13 @@ class CatServiceTest {
 
     CatResponse result = service.update(1L, request);
 
-    assertEquals("NewName", result.getName());
+    assertEquals("NewName", result.name());
   }
 
   @Test
   void update_shouldThrowException_whenNotFound() {
 
-      CatRequest request = CatRequest.builder()
-      .name("Test")
-      .color("Gray")
-      .age(2)
-      .build();
+      CatRequest request = new CatRequest("Test", "Gray", 2);
 
       when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -271,43 +225,25 @@ class CatServiceTest {
   @Test
   void getJokeFromDogs_shouldReturnJoke() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+    JokeResponse mockResponse = new JokeResponse(
+      "single",
+      "Funny joke"
+    );
 
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(anyString())).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-
-    JokeResponse mockResponse = JokeResponse.builder()
-      .type("single")
-      .content("Funny joke")
-      .build();
-
-    when(responseSpec.bodyToMono(JokeResponse.class))
-      .thenReturn(reactor.core.publisher.Mono.just(mockResponse));
+    when(dogsClient.getJoke())
+      .thenReturn(mockResponse);
 
     JokeResponse result = service.getJokeFromDogs();
 
-    assertEquals("single", result.getType());
-    assertEquals("Funny joke", result.getContent());
+    assertEquals("single", result.type());
+    assertEquals("Funny joke", result.content());
   }
 
   @Test
   void getJokeFromDogs_shouldThrowException_whenNullResponse() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(anyString())).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-
-    when(responseSpec.bodyToMono(JokeResponse.class))
-      .thenReturn(reactor.core.publisher.Mono.empty());
+    when(dogsClient.getJoke())
+      .thenThrow(new ExternalServiceException("Respuesta vacía de Dogs"));
 
     assertThrows(ExternalServiceException.class, () -> {
       service.getJokeFromDogs();
@@ -317,45 +253,30 @@ class CatServiceTest {
   @Test
   void getPokemons_shouldReturnList() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+    PokemonResponse pokemon = new PokemonResponse("pikachu", null);
 
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(any(java.util.function.Function.class))).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    PokemonApiResponse apiResponse = new PokemonApiResponse(
+      List.of(pokemon)
+    );
 
-    PokemonResponse pokemon = new PokemonResponse();
-    pokemon.setName("pikachu");
-
-    PokemonApiResponse apiResponse = new PokemonApiResponse();
-    apiResponse.setResults(List.of(pokemon));
-
-    when(responseSpec.bodyToMono(PokemonApiResponse.class))
-      .thenReturn(reactor.core.publisher.Mono.just(apiResponse));
+    when(pokemonApiClient.getPokemons(1))
+      .thenReturn(apiResponse);
 
     List<PokemonResponse> result = service.getPokemons(1);
 
     assertEquals(1, result.size());
-    assertEquals("pikachu", result.get(0).getName());
+    assertEquals("pikachu", result.get(0).name());
   }
 
   @Test
   void getPokemons_shouldThrowException_whenResponseInvalid() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(any(java.util.function.Function.class))).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-
-    // Simulamos respuesta inválida (sin results)
-    when(responseSpec.bodyToMono(PokemonApiResponse.class))
-      .thenReturn(reactor.core.publisher.Mono.just(new PokemonApiResponse()));
+    when(pokemonApiClient.getPokemons(1))
+    .thenThrow(
+      new ExternalServiceException(
+        "Respuesta inválida de Pokemon API"
+      )
+    );
 
     assertThrows(ExternalServiceException.class, () -> {
       service.getPokemons(1);
@@ -365,17 +286,12 @@ class CatServiceTest {
   @Test
   void getPokemons_shouldThrowException_whenResponseNull() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(any(java.util.function.Function.class))).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-
-    when(responseSpec.bodyToMono(PokemonApiResponse.class))
-      .thenReturn(reactor.core.publisher.Mono.empty());
+    when(pokemonApiClient.getPokemons(1))
+    .thenThrow(
+      new ExternalServiceException(
+        "Respuesta inválida de Pokemon API"
+      )
+    );
 
     assertThrows(ExternalServiceException.class, () -> {
       service.getPokemons(1);
@@ -385,19 +301,8 @@ class CatServiceTest {
   @Test
   void getJokeFromDogs_shouldThrowException_whenExternalError() {
 
-    WebClient.RequestHeadersUriSpec uriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-    WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-    WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-
-    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-    when(uriSpec.uri(anyString())).thenReturn(headersSpec);
-    when(headersSpec.retrieve()).thenReturn(responseSpec);
-
-    when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-
-    // simulamos error devolviendo Mono vacío (trigger fallback)
-    when(responseSpec.bodyToMono(JokeResponse.class))
-      .thenReturn(reactor.core.publisher.Mono.empty());
+    when(dogsClient.getJoke())
+      .thenThrow(new ExternalServiceException("Error Dogs API"));
 
     assertThrows(ExternalServiceException.class, () -> {
       service.getJokeFromDogs();
@@ -437,10 +342,7 @@ class CatServiceTest {
       "image/jpeg",
       "test".getBytes());
 
-    CatResponse response = CatResponse.builder()
-      .id(1L)
-      .name("Tom")
-      .build();
+    CatResponse response = new CatResponse(1L, "Tom", null, null);
 
     when(repository.findById(1L))
       .thenReturn(Optional.of(cat));

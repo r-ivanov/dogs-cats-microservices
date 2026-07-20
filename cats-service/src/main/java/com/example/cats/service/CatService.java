@@ -8,20 +8,18 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClient;
-
+import com.example.cats.client.DogsClient;
+import com.example.cats.client.PokemonApiClient;
 import com.example.cats.domain.Cat;
 import com.example.cats.dto.CatRequest;
 import com.example.cats.dto.CatResponse;
 import com.example.cats.dto.JokeResponse;
 import com.example.cats.dto.PokemonResponse;
 import com.example.cats.dto.PokemonApiResponse;
-import com.example.cats.exception.ExternalServiceException;
 import com.example.cats.exception.PhotoStorageException;
 import com.example.cats.exception.ResourceNotFoundException;
 import com.example.cats.mapper.CatMapper;
@@ -35,11 +33,8 @@ public class CatService {
 
   private final CatRepository repository;
   private final CatMapper mapper;
-  private final WebClient webClient;
-
-  @Value("${services.dogs.url}")
-  private String dogsServiceUrl;
-
+  private final DogsClient dogsClient;
+  private final PokemonApiClient pokemonApiClient;
 
   @Cacheable("cats")
   public List<CatResponse> getAll() {
@@ -72,9 +67,9 @@ public class CatService {
     Cat cat = repository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Cat not found"));
 
-    cat.setName(request.getName());
-    cat.setColor(request.getColor());
-    cat.setAge(request.getAge());
+    cat.setName(request.name());
+    cat.setColor(request.color());
+    cat.setAge(request.age());
 
     return mapper.toResponse(repository.save(cat));
   }
@@ -88,57 +83,14 @@ public class CatService {
   }
 
   public JokeResponse getJokeFromDogs() {
-
-    JokeResponse response = webClient.get()
-      .uri(dogsServiceUrl + "/api/dogs/joke")
-      .retrieve()
-      .onStatus(status -> status.isError(),
-        clientResponse -> clientResponse.bodyToMono(String.class)
-          .defaultIfEmpty("Sin mensaje")
-          .map(body -> new ExternalServiceException(
-            "Error Dogs API: "
-            + clientResponse.statusCode()
-            + " - " + body
-          ))
-      )
-      .bodyToMono(JokeResponse.class)
-      .block();
-
-    if (response == null) {
-      throw new ExternalServiceException("Respuesta vacía de Dogs");
-    }
-
-    return response;
+    return dogsClient.getJoke();
   }
 
   public List<PokemonResponse> getPokemons(int limit) {
 
-    PokemonApiResponse response = webClient.get()
-      .uri(uriBuilder -> uriBuilder
-        .scheme("https")
-        .host("pokeapi.co")
-        .path("/api/v2/pokemon")
-        .queryParam("limit", limit)
-        .build())
-      .retrieve()
-      .onStatus(
-        status -> status.isError(),
-        clientResponse -> clientResponse.bodyToMono(String.class)
-          .defaultIfEmpty("Sin mensaje")
-          .map(body -> new ExternalServiceException(
-            "Error Pokemon API: "
-            + clientResponse.statusCode()
-            + " - " + body
-          ))
-      )
-      .bodyToMono(PokemonApiResponse.class)
-      .block();
+    PokemonApiResponse response = pokemonApiClient.getPokemons(limit);
 
-    if (response == null || response.getResults() == null) {
-      throw new ExternalServiceException("Respuesta inválida de Pokemon API");
-    }
-
-    return response.getResults();
+    return response.results();
   }
 
   public CatResponse uploadPhoto(Long id, MultipartFile file) {

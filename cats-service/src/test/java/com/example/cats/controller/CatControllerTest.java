@@ -43,12 +43,7 @@ class CatControllerTest {
     @Test
     void getAll_shouldReturnCats() throws Exception {
 
-      CatResponse cat = CatResponse.builder()
-        .id(1L)
-        .name("Milo")
-        .color("Black")
-        .age(3)
-        .build();
+      CatResponse cat = new CatResponse(1L, "Milo", "Black", 3);
 
       when(service.getAll()).thenReturn(List.of(cat));
 
@@ -60,12 +55,7 @@ class CatControllerTest {
     @Test
     void getById_shouldReturnCat() throws Exception {
 
-      CatResponse cat = CatResponse.builder()
-        .id(1L)
-        .name("Milo")
-        .color("Black")
-        .age(3)
-        .build();
+      CatResponse cat = new CatResponse(1L, "Milo", "Black", 3);
 
       when(service.getById(1L)).thenReturn(cat);
 
@@ -87,18 +77,9 @@ class CatControllerTest {
     @Test
     void create_shouldReturn201_whenValid() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("Milo")
-        .color("Black")
-        .age(3)
-        .build();
+      CatRequest request = new CatRequest("Milo", "Black", 3);
 
-      CatResponse response = CatResponse.builder()
-        .id(1L)
-        .name("Milo")
-        .color("Black")
-        .age(3)
-        .build();
+      CatResponse response = new CatResponse(1L, "Milo", "Black", 3);
 
       when(service.create(any(CatRequest.class))).thenReturn(response);
 
@@ -121,11 +102,11 @@ class CatControllerTest {
     @Test
     void create_shouldReturn400_whenNameBlank() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("")     // inválido
-        .color("Black")
-        .age(3)
-        .build();
+      CatRequest request = new CatRequest(
+        "", // invalido
+        "Black",
+        3
+      );
 
       mockMvc.perform(post("/api/cats")
         .contentType(MediaType.APPLICATION_JSON)
@@ -136,11 +117,7 @@ class CatControllerTest {
     @Test
     void create_shouldReturn400_whenAgeNegative() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("Milo")
-        .color("Black")
-        .age(-1)
-        .build();
+      CatRequest request = new CatRequest("Milo", "Black", -1);
 
       mockMvc.perform(post("/api/cats")
         .contentType(MediaType.APPLICATION_JSON)
@@ -151,11 +128,7 @@ class CatControllerTest {
     @Test
     void create_shouldReturn400_whenAgeTooHigh() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("Milo")
-        .color("Black")
-        .age(30)
-        .build();
+      CatRequest request = new CatRequest("Milo", "Black", 30);
 
       mockMvc.perform(post("/api/cats")
         .contentType(MediaType.APPLICATION_JSON)
@@ -166,11 +139,7 @@ class CatControllerTest {
     @Test
     void create_shouldReturnValidationMessage() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("")   // fuerza error
-        .color("")  // fuerza error
-        .age(-1)    // fuerza error
-        .build();
+      CatRequest request = new CatRequest("", "", -1);
 
       mockMvc.perform(post("/api/cats")
         .contentType(MediaType.APPLICATION_JSON)
@@ -183,11 +152,7 @@ class CatControllerTest {
     @Test
     void create_shouldReturn500_whenServiceFails() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("Milo")
-        .color("Black")
-        .age(3)
-        .build();
+      CatRequest request = new CatRequest("Milo", "Black", 3);
 
       when(service.create(any()))
         .thenThrow(new RuntimeException("error"));
@@ -201,18 +166,9 @@ class CatControllerTest {
     @Test
     void update_shouldReturnUpdatedCat() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("NewName")
-        .color("White")
-        .age(2)
-        .build();
+      CatRequest request = new CatRequest("NewName", "White", 2);
 
-      CatResponse response = CatResponse.builder()
-        .id(1L)
-        .name("NewName")
-        .color("White")
-        .age(2)
-        .build();
+      CatResponse response = new CatResponse(1L, "NewName", "White", 2);
 
       when(service.update(eq(1L), any(CatRequest.class)))
         .thenReturn(response);
@@ -227,11 +183,7 @@ class CatControllerTest {
     @Test
     void update_shouldReturn404_whenNotFound() throws Exception {
 
-      CatRequest request = CatRequest.builder()
-        .name("Test")
-        .color("Gray")
-        .age(2)
-        .build();
+      CatRequest request = new CatRequest("Test", "Gray", 2);
 
       when(service.update(eq(1L), any(CatRequest.class)))
         .thenThrow(new ResourceNotFoundException("Not found"));
@@ -262,10 +214,10 @@ class CatControllerTest {
     @Test
     void getJoke_shouldReturnJoke() throws Exception {
 
-      JokeResponse response = JokeResponse.builder()
-        .type("single")
-        .content("Funny joke")
-        .build();
+      JokeResponse response = new JokeResponse(
+        "single",
+        "Funny joke"
+      );
 
       when(service.getJokeFromDogs()).thenReturn(response);
 
@@ -287,8 +239,7 @@ class CatControllerTest {
     @Test
     void getPokemons_shouldReturnList() throws Exception {
 
-      PokemonResponse pokemon = new PokemonResponse();
-      pokemon.setName("pikachu");
+      PokemonResponse pokemon = new PokemonResponse("pikachu", null);
 
       when(service.getPokemons(10)).thenReturn(List.of(pokemon));
 
