@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -54,7 +55,9 @@ public class DogController {
       responseCode = "200",
       description = "Dogs retrieved successfully",
       content = @Content(
-        schema = @Schema(implementation = DogResponse.class)
+        array = @ArraySchema(
+          schema = @Schema(implementation = DogResponse.class)
+        )
       )
     ),
     @ApiResponse(
@@ -251,7 +254,9 @@ public class DogController {
       responseCode = "200",
       description = "Pokemons retrieved successfully",
       content = @Content(
-        schema = @Schema(implementation = PokemonResponse.class)
+        array = @ArraySchema(
+          schema = @Schema(implementation = PokemonResponse.class)
+        )
       )
     ),
     @ApiResponse(

@@ -35,67 +35,67 @@ class CatsClientTest {
     @Test
     void getPokemons_shouldReturnList() {
 
-        WebClient.RequestHeadersUriSpec uriSpec =
-            mock(WebClient.RequestHeadersUriSpec.class);
-        WebClient.RequestHeadersSpec headersSpec =
-            mock(WebClient.RequestHeadersSpec.class);
-        WebClient.ResponseSpec responseSpec =
-            mock(WebClient.ResponseSpec.class);
+      WebClient.RequestHeadersUriSpec uriSpec =
+        mock(WebClient.RequestHeadersUriSpec.class);
+      WebClient.RequestHeadersSpec headersSpec =
+        mock(WebClient.RequestHeadersSpec.class);
+      WebClient.ResponseSpec responseSpec =
+        mock(WebClient.ResponseSpec.class);
 
-        when(webClient.get())
-            .thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
+      when(webClient.get())
+        .thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
 
-        when(uriSpec.uri(anyString(), anyInt()))
-            .thenReturn(headersSpec);
+      when(uriSpec.uri(anyString(), anyInt()))
+        .thenReturn(headersSpec);
 
-        when(headersSpec.retrieve())
-            .thenReturn(responseSpec);
+      when(headersSpec.retrieve())
+        .thenReturn(responseSpec);
 
-        when(responseSpec.onStatus(any(), any()))
-            .thenReturn(responseSpec);
+      when(responseSpec.onStatus(any(), any()))
+        .thenReturn(responseSpec);
 
-        List<PokemonApiResponse> mockResponse = List.of(
-            new PokemonApiResponse("Pikachu")
-        );
+      List<PokemonApiResponse> mockResponse = List.of(
+        new PokemonApiResponse("Pikachu")
+      );
 
-        when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
-            .thenReturn((Mono) Mono.just(mockResponse));
+      when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
+        .thenReturn((Mono) Mono.just(mockResponse));
 
-        List<PokemonApiResponse> result =
-            catsClient.getPokemons(1);
+      List<PokemonApiResponse> result =
+        catsClient.getPokemons(1);
 
-        assertEquals(1, result.size());
-        assertEquals("Pikachu", result.get(0).name());
+      assertEquals(1, result.size());
+      assertEquals("Pikachu", result.get(0).name());
     }
 
     @Test
     void getPokemons_shouldThrowException_whenResponseIsNull() {
 
-        WebClient.RequestHeadersUriSpec uriSpec =
-            mock(WebClient.RequestHeadersUriSpec.class);
-        WebClient.RequestHeadersSpec headersSpec =
-            mock(WebClient.RequestHeadersSpec.class);
-        WebClient.ResponseSpec responseSpec =
-            mock(WebClient.ResponseSpec.class);
+      WebClient.RequestHeadersUriSpec uriSpec =
+        mock(WebClient.RequestHeadersUriSpec.class);
+      WebClient.RequestHeadersSpec headersSpec =
+        mock(WebClient.RequestHeadersSpec.class);
+      WebClient.ResponseSpec responseSpec =
+        mock(WebClient.ResponseSpec.class);
 
-        when(webClient.get())
-            .thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
+      when(webClient.get())
+        .thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
 
-        when(uriSpec.uri(anyString(), anyInt()))
-            .thenReturn(headersSpec);
+      when(uriSpec.uri(anyString(), anyInt()))
+        .thenReturn(headersSpec);
 
-        when(headersSpec.retrieve())
-            .thenReturn(responseSpec);
+      when(headersSpec.retrieve())
+        .thenReturn(responseSpec);
 
-        when(responseSpec.onStatus(any(), any()))
-            .thenReturn(responseSpec);
+      when(responseSpec.onStatus(any(), any()))
+        .thenReturn(responseSpec);
 
-        when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
-            .thenReturn(Mono.empty());
+      when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class)))
+        .thenReturn(Mono.empty());
 
-        assertThrows(
-            ExternalServiceException.class,
-            () -> catsClient.getPokemons(1)
-        );
+      assertThrows(
+        ExternalServiceException.class,
+        () -> catsClient.getPokemons(1)
+      );
     }
 }
