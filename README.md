@@ -8,30 +8,61 @@ Proyecto de microservicios desarrollado con **Spring Boot 4**, que expone APIs R
 
 - Java 25
 - Spring Boot 4
-- Spring Web / WebFlux
+- Spring Web MVC
+- Spring WebFlux (WebClient)
 - Spring Data JPA
 - H2 Database
 - Flyway
 - MapStruct
+- Java Records
 - JUnit 5 / Mockito
 - MockMvc
-- JaCoCo (coverage)
+- JaCoCo
 - Docker & Docker Compose
 - Azure Pipelines
+- Maven Multi-Module
 
 ---
 
 ## Arquitectura
 
-El proyecto está compuesto por dos microservicios:
+```text
+dogs-cats-parent
+├── dogs-service
+├── cats-service
+├── docker-compose.yml
+└── azure-pipelines.yml
+```
+
+### Parent Maven
+
+Centraliza:
+- Configuración Maven común
+- Dependency Management
+- Versiones compartidas
+- JaCoCo
+- Compiler Plugin
+- Spring Boot Maven Plugin
+
+## Arquitectura de microservicios
 
 ### Dogs Service
 
+Responsabilidades:
 - CRUD de perros
 - Consumo de API externa de chistes
-- Exposición de endpoint de chistes consumido por cats-service
-- Consumo de cats-service para obtener pokemons
-- Gestión de imágenes de perros
+- Exposición de endpoint de chistes para cats-service
+- Consumo de cats-service para obtener Pokémons
+- Gestión de imágenes
+
+```text
+client/
+├── JokeApiClient
+└── CatsClient
+
+service/
+└── DogService
+```
 
 ### Cats Service
 
@@ -39,7 +70,30 @@ El proyecto está compuesto por dos microservicios:
 - Consumo de API externa de pokemons
 - Exposición de endpoint de pokemons consumido por dogs-service
 - Consumo de dogs-service para obtener chistes
-- Gestión de imágenes de gatos
+- Gestión de imágenes
+
+```text
+client/
+├── DogsClient
+└── PokemonApiClient
+
+service/
+└── CatService
+```
+
+## DTOs y mapeo
+
+- Java Records para DTOs inmutables
+- MapStruct para conversión entre entidades y DTOs
+
+Ejemplos:
+- DogRequest
+- DogResponse
+- CatRequest
+- CatResponse
+- JokeResponse
+- PokemonResponse
+- PokemonApiResponse
 
 ## Comunicación entre servicios
 
@@ -68,16 +122,22 @@ Comprobación rápida:
 - docker --version
 - docker compose version
 
+## Compilación completa
+
+Desde la raíz del proyecto:
+
+```bash
+mvn clean install
+```
+
 ## Ejecución en local
 
 ### Dogs Service
 
-1. Entrar en la carpeta dogs-service
-2. Ejecutar:
-
-mvn clean spring-boot:run
-
-URLs:
+```bash
+cd dogs-service
+mvn spring-boot:run
+```
 
 - API: http://localhost:8081
 - Swagger: http://localhost:8081/swagger-ui/index.html
@@ -85,35 +145,36 @@ URLs:
 
 ### Cats Service
 
-1. Entrar en la carpeta cats-service
-2. Ejecutar:
-
-mvn clean spring-boot:run
-
-URLs:
+```bash
+cd cats-service
+mvn spring-boot:run
+```
 
 - API: http://localhost:8082
 - Swagger: http://localhost:8082/swagger-ui/index.html
 - H2 Console: http://localhost:8082/h2-console
 
-## Ejecución con Docker
+## Docker
 
-### Compilación
+```bash
+mvn clean package
+docker compose up --build
+```
 
-1. Entrar en dogs-service
-2. Ejecutar mvn clean package
-3. Entrar en cats-service
-4. Ejecutar mvn clean package
+## Testing
 
-### Arranque
+### Proyecto completo
 
-Ejecutar:
-
-docker-compose up --build
-
-## URLs principales
+```bash
+mvn clean test
+```
 
 ### Dogs Service
+
+```bash
+cd dogs-service
+mvn clean test
+```
 
 - Swagger: http://localhost:8081/swagger-ui/index.html
 - H2 Console: http://localhost:8081/h2-console
@@ -122,10 +183,34 @@ docker-compose up --build
 
 ### Cats Service
 
+```bash
+cd cats-service
+mvn clean test
+```
+
 - Swagger: http://localhost:8082/swagger-ui/index.html
 - H2 Console: http://localhost:8082/h2-console
 - JDBC URL: jdbc:h2:mem:catsdb
 - Usuario: sa
+
+## Cobertura JaCoCo
+
+### Dogs Service
+
+- Instruction Coverage: 88%
+- Branch Coverage: 100%
+
+### Cats Service
+
+- Instruction Coverage: 82%
+- Branch Coverage: 100%
+
+Informes:
+
+```text
+dogs-service/target/site/jacoco/index.html
+cats-service/target/site/jacoco/index.html
+```
 
 ## Gestión de imágenes
 
@@ -159,33 +244,6 @@ Almacenamiento:
 
 - cats-service/uploads/cats
 
-## Ejecutar tests
-
-### Dogs Service
-
-mvn clean test
-
-### Cats Service
-
-mvn clean test
-
-## Reporte de cobertura
-
-El proyecto utiliza JaCoCo.
-
-Generación:
-
-mvn clean test
-
-Informe:
-
-target/site/jacoco/index.html
-
-Cobertura actual:
-
-- dogs-service: 82%
-- cats-service: 80%
-
 ## CI Pipeline
 
 Incluye azure-pipelines.yml para:
@@ -200,16 +258,19 @@ Incluye azure-pipelines.yml para:
 - docker-compose.yml
 - azure-pipelines.yml
 
-## Funcionalidades principales
+## Funcionalidades destacadas
 
-- CRUD de entidades
-- Validación de entrada con @Valid
+- CRUD completo
+- Validación con Bean Validation
 - Manejo global de excepciones
-- Integración con APIs externas
-- Comunicación entre microservicios
-- Gestión de imágenes
-- Dockerización completa
+- Integración entre microservicios
+- Consumo de APIs externas
+- DTOs con Records
+- MapStruct
+- Dockerización
+- Maven multi-módulo
+- Cobertura JaCoCo
 
 ## Autor
 
-Roumen Ivanov Andreev
+**Roumen Ivanov Andreev**
