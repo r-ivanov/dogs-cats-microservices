@@ -10,7 +10,6 @@
     <version>1.0.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <groupId>com.example</groupId>
   <artifactId>dogs-service</artifactId>
   <name/>
   <description/>
