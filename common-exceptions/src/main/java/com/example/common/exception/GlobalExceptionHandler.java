@@ -1,14 +1,13 @@
-package com.example.cats.exception;
+package com.example.common.exception;
 
+import java.time.LocalDateTime;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import org.springframework.http.HttpStatus;
-
-import java.time.LocalDateTime;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -19,15 +18,15 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ResourceNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
-  public ErrorResponse handleNotFound(ResourceNotFoundException ex,
+  public ErrorResponse handleNotFound(ResourceNotFoundException ex, 
                                       HttpServletRequest request) {
 
-    return ErrorResponse.builder()
-      .timestamp(LocalDateTime.now())
-      .status(HttpStatus.NOT_FOUND.value())
-      .message(ex.getMessage())
-      .path(request.getRequestURI())
-      .build();
+    return new ErrorResponse(
+      LocalDateTime.now(),
+      HttpStatus.NOT_FOUND.value(),
+      ex.getMessage(),
+      request.getRequestURI()
+    );
   }
 
   @ExceptionHandler(Exception.class)
@@ -38,27 +37,25 @@ public class GlobalExceptionHandler {
 
     // log debug
     ex.printStackTrace();
-
-    return ErrorResponse.builder()
-      .timestamp(LocalDateTime.now())
-      .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-      .message(ex.getMessage())
-      .path(request.getRequestURI())
-      .build();
+    return new ErrorResponse(
+      LocalDateTime.now(),
+      HttpStatus.INTERNAL_SERVER_ERROR.value(),
+      ex.getMessage(),
+      request.getRequestURI()
+    );
   }
 
   @ExceptionHandler(ExternalServiceException.class)
   @ResponseStatus(HttpStatus.BAD_GATEWAY)
   @ResponseBody
-  public ErrorResponse handleExternalService(ExternalServiceException ex,
+  public ErrorResponse handleExternalService(ExternalServiceException ex, 
                                              HttpServletRequest request) {
-
-    return ErrorResponse.builder()
-      .timestamp(LocalDateTime.now())
-      .status(HttpStatus.BAD_GATEWAY.value())
-      .message(ex.getMessage())
-      .path(request.getRequestURI())
-      .build();
+    return new ErrorResponse(
+      LocalDateTime.now(),
+      HttpStatus.BAD_GATEWAY.value(),
+      ex.getMessage(),
+      request.getRequestURI()
+    );
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -74,12 +71,12 @@ public class GlobalExceptionHandler {
       .findFirst()
       .orElse("Validation error");
 
-    return ErrorResponse.builder()
-      .timestamp(LocalDateTime.now())
-      .status(HttpStatus.BAD_REQUEST.value())
-      .message(message)
-      .path(request.getRequestURI())
-      .build();
+    return new ErrorResponse(
+      LocalDateTime.now(),
+      HttpStatus.BAD_REQUEST.value(),
+      message,
+      request.getRequestURI()
+    );
   }
 
   @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
@@ -88,12 +85,12 @@ public class GlobalExceptionHandler {
   public ErrorResponse handleConstraintViolation(jakarta.validation.ConstraintViolationException ex,
                                                  HttpServletRequest request) {
 
-    return ErrorResponse.builder()
-      .timestamp(LocalDateTime.now())
-      .status(HttpStatus.BAD_REQUEST.value())
-      .message("Invalid parameter")
-      .path(request.getRequestURI())
-      .build();
+    return new ErrorResponse(
+      LocalDateTime.now(),
+      HttpStatus.BAD_REQUEST.value(),
+      "Invalid parameter",
+      request.getRequestURI()
+    );
   }
 
   @ExceptionHandler(PhotoStorageException.class)
@@ -102,11 +99,11 @@ public class GlobalExceptionHandler {
   public ErrorResponse handlePhotoStorage(PhotoStorageException ex,
                                           HttpServletRequest request) {
 
-    return ErrorResponse.builder()
-      .timestamp(LocalDateTime.now())
-      .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-      .message(ex.getMessage())
-      .path(request.getRequestURI())
-      .build();
+    return new ErrorResponse(
+      LocalDateTime.now(),
+      HttpStatus.INTERNAL_SERVER_ERROR.value(),
+      ex.getMessage(),
+      request.getRequestURI()
+    );
   }
 }

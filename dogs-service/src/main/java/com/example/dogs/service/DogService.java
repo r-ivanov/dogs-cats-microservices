@@ -12,6 +12,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.example.common.exception.PhotoStorageException;
+import com.example.common.exception.ResourceNotFoundException;
 import com.example.dogs.client.CatsClient;
 import com.example.dogs.client.JokeApiClient;
 import com.example.dogs.domain.Dog;
@@ -21,8 +24,6 @@ import com.example.dogs.dto.JokeApiResponse;
 import com.example.dogs.dto.JokeResponse;
 import com.example.dogs.dto.PokemonApiResponse;
 import com.example.dogs.dto.PokemonResponse;
-import com.example.dogs.exception.PhotoStorageException;
-import com.example.dogs.exception.ResourceNotFoundException;
 import com.example.dogs.mapper.DogMapper;
 import com.example.dogs.mapper.JokeMapper;
 import com.example.dogs.repository.DogRepository;

@@ -1,31 +1,38 @@
 package com.example.cats.controller;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-
-import com.example.cats.dto.*;
-import com.example.cats.exception.ErrorResponse;
-import com.example.cats.exception.ExternalServiceException;
-import com.example.cats.exception.ResourceNotFoundException;
-import com.example.cats.service.CatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.example.cats.dto.CatRequest;
+import com.example.cats.dto.CatResponse;
+import com.example.cats.dto.JokeResponse;
+import com.example.cats.dto.PokemonResponse;
+import com.example.common.exception.ErrorResponse;
+import com.example.cats.service.CatService;
+import com.example.common.exception.ExternalServiceException;
+import com.example.common.exception.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -288,12 +295,13 @@ class CatControllerTest {
     @Test
     void errorResponse_shouldBuildCorrectly() {
 
-      ErrorResponse error = ErrorResponse.builder()
-        .status(404)
-        .message("Not found")
-        .path("/api/test")
-        .build();
+      ErrorResponse error = new ErrorResponse(
+        null,
+        404,
+        "Not found",
+        "/api/test"
+      );
 
-      assertEquals(404, error.getStatus());
+      assertEquals(404, error.status());
     }
 }

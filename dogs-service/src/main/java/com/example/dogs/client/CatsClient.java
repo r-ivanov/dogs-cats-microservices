@@ -1,13 +1,14 @@
 package com.example.dogs.client;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.common.exception.ExternalServiceException;
 import com.example.dogs.dto.PokemonApiResponse;
-import com.example.dogs.exception.ExternalServiceException;
 
 import lombok.RequiredArgsConstructor;
 

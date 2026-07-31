@@ -1,25 +1,20 @@
 package com.example.dogs.controller;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-
-import com.example.dogs.dto.DogRequest;
-import com.example.dogs.dto.DogResponse;
-import com.example.dogs.dto.JokeResponse;
-import com.example.dogs.dto.PokemonResponse;
-import com.example.dogs.exception.ErrorResponse;
-import com.example.dogs.exception.ExternalServiceException;
-import com.example.dogs.exception.ResourceNotFoundException;
-import com.example.dogs.service.DogService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +22,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.common.exception.ExternalServiceException;
+import com.example.common.exception.ResourceNotFoundException;
+import com.example.dogs.dto.DogRequest;
+import com.example.dogs.dto.DogResponse;
+import com.example.dogs.dto.JokeResponse;
+import com.example.dogs.dto.PokemonResponse;
+import com.example.common.exception.ErrorResponse;
+import com.example.dogs.service.DogService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -341,13 +346,14 @@ class DogControllerTest {
   @Test
   void errorResponse_shouldBuildCorrectly() {
 
-    ErrorResponse error = ErrorResponse.builder()
-      .status(404)
-      .message("Not found")
-      .path("/api/test")
-      .build();
+    ErrorResponse error = new ErrorResponse(
+      null,
+      404,
+      "Not found",
+      "/api/test"
+    );
 
-    assertEquals(404, error.getStatus());
+    assertEquals(404, error.status());
   }
 
   @Test

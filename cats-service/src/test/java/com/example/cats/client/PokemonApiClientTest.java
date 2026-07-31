@@ -8,16 +8,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import com.example.cats.dto.PokemonApiResponse;
-import com.example.cats.dto.PokemonResponse;
-import com.example.cats.exception.ExternalServiceException;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.cats.dto.PokemonApiResponse;
+import com.example.cats.dto.PokemonResponse;
+import com.example.common.exception.ExternalServiceException;
 
 import reactor.core.publisher.Mono;
 

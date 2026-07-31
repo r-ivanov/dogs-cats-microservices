@@ -1,26 +1,16 @@
 package com.example.dogs.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-
-import com.example.dogs.dto.DogRequest;
-import com.example.dogs.dto.DogResponse;
-import com.example.dogs.dto.JokeResponse;
-import com.example.dogs.dto.PokemonApiResponse;
-import com.example.dogs.dto.JokeApiResponse;
-import com.example.dogs.dto.PokemonResponse;
-import com.example.dogs.client.CatsClient;
-import com.example.dogs.client.JokeApiClient;
-import com.example.dogs.domain.Dog;
-import com.example.dogs.exception.ExternalServiceException;
-import com.example.dogs.exception.PhotoStorageException;
-import com.example.dogs.exception.ResourceNotFoundException;
-import com.example.dogs.mapper.DogMapper;
-import com.example.dogs.mapper.JokeMapper;
-import com.example.dogs.repository.DogRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +20,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.common.exception.ExternalServiceException;
+import com.example.common.exception.PhotoStorageException;
+import com.example.common.exception.ResourceNotFoundException;
+import com.example.dogs.client.CatsClient;
+import com.example.dogs.client.JokeApiClient;
+import com.example.dogs.domain.Dog;
+import com.example.dogs.dto.DogRequest;
+import com.example.dogs.dto.DogResponse;
+import com.example.dogs.dto.JokeApiResponse;
+import com.example.dogs.dto.JokeResponse;
+import com.example.dogs.dto.PokemonApiResponse;
+import com.example.dogs.dto.PokemonResponse;
+import com.example.dogs.mapper.DogMapper;
+import com.example.dogs.mapper.JokeMapper;
+import com.example.dogs.repository.DogRepository;
 
 @ExtendWith(MockitoExtension.class)
 class DogServiceTest {

@@ -12,18 +12,19 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.example.cats.client.DogsClient;
 import com.example.cats.client.PokemonApiClient;
 import com.example.cats.domain.Cat;
 import com.example.cats.dto.CatRequest;
 import com.example.cats.dto.CatResponse;
 import com.example.cats.dto.JokeResponse;
-import com.example.cats.dto.PokemonResponse;
 import com.example.cats.dto.PokemonApiResponse;
-import com.example.cats.exception.PhotoStorageException;
-import com.example.cats.exception.ResourceNotFoundException;
+import com.example.cats.dto.PokemonResponse;
 import com.example.cats.mapper.CatMapper;
 import com.example.cats.repository.CatRepository;
+import com.example.common.exception.PhotoStorageException;
+import com.example.common.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 

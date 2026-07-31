@@ -3,8 +3,8 @@ package com.example.dogs.client;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.common.exception.ExternalServiceException;
 import com.example.dogs.dto.JokeApiResponse;
-import com.example.dogs.exception.ExternalServiceException;
 
 import lombok.RequiredArgsConstructor;
 

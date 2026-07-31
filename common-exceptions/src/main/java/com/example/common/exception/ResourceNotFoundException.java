@@ -1,5 +1,5 @@
 
-package com.example.dogs.exception;
+package com.example.common.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 

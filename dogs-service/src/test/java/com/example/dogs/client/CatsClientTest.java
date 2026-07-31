@@ -10,9 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import com.example.dogs.dto.PokemonApiResponse;
-import com.example.dogs.exception.ExternalServiceException;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.common.exception.ExternalServiceException;
+import com.example.dogs.dto.PokemonApiResponse;
 
 import reactor.core.publisher.Mono;
 

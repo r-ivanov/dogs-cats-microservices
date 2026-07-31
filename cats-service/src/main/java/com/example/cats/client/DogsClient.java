@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.cats.dto.JokeResponse;
-import com.example.cats.exception.ExternalServiceException;
+import com.example.common.exception.ExternalServiceException;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,21 +1,16 @@
 package com.example.cats.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
-import com.example.cats.client.DogsClient;
-import com.example.cats.client.PokemonApiClient;
-import com.example.cats.domain.Cat;
-import com.example.cats.dto.*;
-import com.example.cats.exception.ExternalServiceException;
-import com.example.cats.exception.PhotoStorageException;
-import com.example.cats.exception.ResourceNotFoundException;
-import com.example.cats.mapper.CatMapper;
-import com.example.cats.repository.CatRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +20,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.cats.client.DogsClient;
+import com.example.cats.client.PokemonApiClient;
+import com.example.cats.domain.Cat;
+import com.example.cats.dto.CatRequest;
+import com.example.cats.dto.CatResponse;
+import com.example.cats.dto.JokeResponse;
+import com.example.cats.dto.PokemonApiResponse;
+import com.example.cats.dto.PokemonResponse;
+import com.example.cats.mapper.CatMapper;
+import com.example.cats.repository.CatRepository;
+import com.example.common.exception.ExternalServiceException;
+import com.example.common.exception.PhotoStorageException;
+import com.example.common.exception.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CatServiceTest {
