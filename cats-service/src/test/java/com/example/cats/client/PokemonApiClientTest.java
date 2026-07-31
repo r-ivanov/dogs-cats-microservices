@@ -45,8 +45,10 @@ class PokemonApiClientTest {
     when(webClient.get())
       .thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
 
-    when(uriSpec.uri(any(java.util.function.Function.class)))
-      .thenReturn(headersSpec);
+    when(uriSpec.uri(
+      "https://pokeapi.co/api/v2/pokemon?limit={limit}",
+      1
+    )).thenReturn(headersSpec);
 
     when(headersSpec.retrieve())
       .thenReturn(responseSpec);
@@ -92,8 +94,10 @@ class PokemonApiClientTest {
     when(webClient.get())
       .thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
 
-    when(uriSpec.uri(any(java.util.function.Function.class)))
-      .thenReturn(headersSpec);
+    when(uriSpec.uri(
+      "https://pokeapi.co/api/v2/pokemon?limit={limit}",
+      1
+    )).thenReturn(headersSpec);
 
     when(headersSpec.retrieve())
       .thenReturn(responseSpec);
@@ -125,8 +129,10 @@ class PokemonApiClientTest {
     when(webClient.get())
       .thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
 
-    when(uriSpec.uri(any(java.util.function.Function.class)))
-      .thenReturn(headersSpec);
+    when(uriSpec.uri(
+      "https://pokeapi.co/api/v2/pokemon?limit={limit}",
+      1
+    )).thenReturn(headersSpec);
 
     when(headersSpec.retrieve())
       .thenReturn(responseSpec);

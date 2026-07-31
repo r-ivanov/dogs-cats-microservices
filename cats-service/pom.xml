@@ -92,6 +92,10 @@
       <groupId>com.example</groupId>
       <artifactId>common-exceptions</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>common-webclient</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

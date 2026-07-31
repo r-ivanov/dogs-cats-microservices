@@ -5,6 +5,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.cats.dto.PokemonApiResponse;
 import com.example.common.exception.ExternalServiceException;
+import com.example.common.webclient.WebClientSupport;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,30 +16,17 @@ public class PokemonApiClient {
   private final WebClient webClient;
 
   public PokemonApiResponse getPokemons(int limit) {
+    PokemonApiResponse response =
+      WebClientSupport.get(
+          webClient,
+          "https://pokeapi.co/api/v2/pokemon?limit={limit}",
+          PokemonApiResponse.class,
+          "Pokemon API",
+          "Respuesta vacía de Pokemon API",
+          limit
+      );
 
-    PokemonApiResponse response = webClient.get()
-      .uri(uriBuilder -> uriBuilder
-        .scheme("https")
-        .host("pokeapi.co")
-        .path("/api/v2/pokemon")
-        .queryParam("limit", limit)
-        .build())
-      .retrieve()
-      .onStatus(
-        status -> status.isError(),
-        clientResponse -> clientResponse.bodyToMono(String.class)
-          .defaultIfEmpty("Sin mensaje")
-          .map(body -> new ExternalServiceException(
-            "Error Pokemon API: "
-              + clientResponse.statusCode()
-              + " - "
-              + body
-          ))
-      )
-      .bodyToMono(PokemonApiResponse.class)
-      .block();
-
-    if (response == null || response.results() == null) {
+    if (response.results() == null) {
       throw new ExternalServiceException("Respuesta inválida de Pokemon API");
     }
 

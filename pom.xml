@@ -38,12 +38,18 @@
         <artifactId>common-exceptions</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>common-webclient</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <modules>
     <module>dogs-service</module>
     <module>cats-service</module>
     <module>common-exceptions</module>
+    <module>common-webclient</module>
   </modules>
   <build>
     <plugins>

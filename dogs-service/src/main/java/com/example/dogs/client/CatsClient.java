@@ -7,7 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.example.common.exception.ExternalServiceException;
+import com.example.common.webclient.WebClientSupport;
 import com.example.dogs.dto.PokemonApiResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -21,26 +21,13 @@ public class CatsClient {
   private String catsServiceUrl;
 
   public List<PokemonApiResponse> getPokemons(int limit) {
-
-    List<PokemonApiResponse> response = webClient.get()
-      .uri(catsServiceUrl + "/api/cats/pokemons?limit={limit}", limit)
-      .retrieve()
-      .onStatus(
-        status -> status.isError(),
-        clientResponse -> clientResponse.bodyToMono(String.class)
-          .defaultIfEmpty("Sin mensaje")
-          .map(body -> new ExternalServiceException(
-              "Error Cats API: "
-                + clientResponse.statusCode()
-                + " - "
-                + body)))
-      .bodyToMono(new ParameterizedTypeReference<List<PokemonApiResponse>>() {})
-      .block();
-
-    if (response == null) {
-      throw new ExternalServiceException("Respuesta vacía de Cats API");
-    }
-
-    return response;
+    return WebClientSupport.get(
+      webClient,
+      catsServiceUrl + "/api/cats/pokemons?limit={limit}",
+      new ParameterizedTypeReference<List<PokemonApiResponse>>() {},
+      "Cats API",
+      "Respuesta vacía de Cats API",
+      limit
+    );
   }
 }
