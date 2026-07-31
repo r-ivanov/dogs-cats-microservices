@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,9 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.cats.dto.CatRequest;
 import com.example.cats.dto.CatResponse;
@@ -303,5 +306,33 @@ class CatControllerTest {
       );
 
       assertEquals(404, error.status());
+    }
+    @Test
+    void uploadPhoto_shouldReturn200() throws Exception {
+
+      CatResponse response = new CatResponse(
+        1L,
+        "Misu",
+        "Persa",
+        3,
+        "/photos/cats/1.jpg"
+      );
+
+      MockMultipartFile file = new MockMultipartFile(
+        "file",
+        "photo.jpg",
+        "image/jpeg",
+        "fake-image".getBytes()
+      );
+
+      when(service.uploadPhoto(eq(1L), any(MultipartFile.class)))
+        .thenReturn(response);
+
+      mockMvc.perform(
+        multipart("/api/cats/1/photo")
+          .file(file))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.photoUrl")
+          .value("/photos/cats/1.jpg"));
     }
 }

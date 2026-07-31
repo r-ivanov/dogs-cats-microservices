@@ -19,7 +19,7 @@ Proyecto de microservicios desarrollado con **Spring Boot 4**, que expone APIs R
 - MockMvc
 - JaCoCo
 - Docker & Docker Compose
-- Azure Pipelines
+- GitHub Actions
 - Maven Multi-Module
 
 ---
@@ -28,10 +28,14 @@ Proyecto de microservicios desarrollado con **Spring Boot 4**, que expone APIs R
 
 ```text
 dogs-cats-parent
+├── common-exceptions
+├── common-webclient
 ├── dogs-service
 ├── cats-service
 ├── docker-compose.yml
-└── azure-pipelines.yml
+└── .github/
+    └── workflows/
+        └── ci.yml
 ```
 
 ### Parent Maven
@@ -44,6 +48,46 @@ Centraliza:
 - Compiler Plugin
 - Spring Boot Maven Plugin
 
+## Módulos compartidos
+
+### common-exceptions
+
+Módulo compartido encargado de centralizar el manejo de errores y excepciones utilizado por todos los microservicios.
+
+Incluye:
+
+- ExternalServiceException
+- ResourceNotFoundException
+- PhotoStorageException
+- ErrorResponse
+- GlobalExceptionHandler
+
+Beneficios:
+
+- Eliminación de código duplicado
+- Manejo uniforme de errores
+- Reutilización entre microservicios
+- Mantenimiento simplificado
+
+### common-webclient
+
+Módulo compartido que centraliza la lógica de comunicación HTTP basada en WebClient.
+
+Incluye:
+
+- Gestión común de errores en llamadas HTTP
+- Soporte para respuestas simples mediante `Class<T>`
+- Soporte para respuestas genéricas mediante `ParameterizedTypeReference<T>`
+- Soporte para variables de URI
+- Utilidades reutilizables para consumo de APIs internas y externas
+
+Beneficios:
+
+- Eliminación de lógica duplicada de comunicación
+- Reutilización de componentes WebClient
+- Mayor mantenibilidad
+- Comportamiento homogéneo entre clientes HTTP
+
 ## Arquitectura de microservicios
 
 ### Dogs Service
@@ -54,6 +98,11 @@ Responsabilidades:
 - Exposición de endpoint de chistes para cats-service
 - Consumo de cats-service para obtener Pokémons
 - Gestión de imágenes
+
+Dependencias compartidas:
+
+- common-exceptions
+- common-webclient
 
 ```text
 client/
@@ -71,6 +120,11 @@ service/
 - Exposición de endpoint de pokemons consumido por dogs-service
 - Consumo de dogs-service para obtener chistes
 - Gestión de imágenes
+
+Dependencias compartidas:
+
+- common-exceptions
+- common-webclient
 
 ```text
 client/
@@ -97,9 +151,17 @@ Ejemplos:
 
 ## Comunicación entre servicios
 
-Los servicios se comunican vía HTTP usando `WebClient`:
+Los servicios se comunican vía HTTP utilizando `WebClient`:
+
 - dogs-service → cats-service
 - cats-service → dogs-service
+
+La lógica común de comunicación HTTP se encuentra centralizada en el módulo `common-webclient`, lo que permite:
+
+- Reutilizar la configuración de llamadas HTTP
+- Centralizar el manejo de errores mediante WebClient
+- Reducir código duplicado entre microservicios
+- Mantener un comportamiento homogéneo en todas las integraciones
 
 URLs internas Docker:
 
@@ -197,13 +259,15 @@ mvn clean test
 
 ### Dogs Service
 
-- Instruction Coverage: 88%
+- Instruction Coverage: 96%
 - Branch Coverage: 100%
 
 ### Cats Service
 
-- Instruction Coverage: 82%
+- Instruction Coverage: 96%
 - Branch Coverage: 100%
+
+Ambos microservicios mantienen una cobertura de código superior al 95%.
 
 Informes:
 
@@ -246,30 +310,36 @@ Almacenamiento:
 
 ## CI Pipeline
 
-Incluye azure-pipelines.yml para:
+El proyecto incluye una pipeline de integración continua basada en GitHub Actions que:
 
-- Compilar el proyecto
-- Ejecutar tests automáticamente
+- Compila el reactor Maven completo
+- Ejecuta automáticamente todos los tests
+- Valida los módulos compartidos
+- Verifica la correcta integración entre microservicios
 
-## Estructura del proyecto
+Módulos validados:
 
-- dogs-service/
-- cats-service/
-- docker-compose.yml
-- azure-pipelines.yml
+- common-exceptions
+- common-webclient
+- dogs-service
+- cats-service
 
 ## Funcionalidades destacadas
 
-- CRUD completo
+- CRUD completo de perros y gatos
 - Validación con Bean Validation
 - Manejo global de excepciones
 - Integración entre microservicios
-- Consumo de APIs externas
-- DTOs con Records
-- MapStruct
-- Dockerización
-- Maven multi-módulo
-- Cobertura JaCoCo
+- Consumo de APIs externas mediante WebClient
+- DTOs implementados con Java Records
+- MapStruct para mapeo entre entidades y DTOs
+- Dockerización con Docker Compose
+- Arquitectura Maven multi-módulo
+- Módulo compartido de excepciones (`common-exceptions`)
+- Módulo compartido para comunicación HTTP (`common-webclient`)
+- Gestión centralizada de errores
+- Reutilización de lógica común entre microservicios
+- Cobertura JaCoCo superior al 95%
 
 ## Autor
 
