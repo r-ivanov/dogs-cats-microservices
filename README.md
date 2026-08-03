@@ -71,28 +71,32 @@ Beneficios:
 
 ### common-webclient
 
-Módulo compartido que centraliza la lógica de comunicación HTTP basada en WebClient.
+Módulo compartido que centraliza toda la comunicación HTTP entre microservicios y APIs externas mediante `WebClient`.
 
 Incluye:
 
-- Gestión común de errores en llamadas HTTP
+- Clase reutilizable `WebClientSupport`
+- Gestión centralizada de errores HTTP
 - Soporte para respuestas simples mediante `Class<T>`
 - Soporte para respuestas genéricas mediante `ParameterizedTypeReference<T>`
-- Soporte para variables de URI
-- Utilidades reutilizables para consumo de APIs internas y externas
+- Resolución de variables de URI
+- Validación de respuestas vacías
+- Manejo homogéneo de excepciones externas
 
 Beneficios:
 
-- Eliminación de lógica duplicada de comunicación
-- Reutilización de componentes WebClient
+- Eliminación completa de clientes HTTP específicos por servicio
+- Reutilización de una única capa de integración
+- Reducción de código duplicado
 - Mayor mantenibilidad
-- Comportamiento homogéneo entre clientes HTTP
+- Comportamiento consistente en todas las llamadas HTTP
 
 ## Arquitectura de microservicios
 
 ### Dogs Service
 
 Responsabilidades:
+
 - CRUD de perros
 - Consumo de API externa de chistes
 - Exposición de endpoint de chistes para cats-service
@@ -104,10 +108,12 @@ Dependencias compartidas:
 - common-exceptions
 - common-webclient
 
+Arquitectura:
+
 ```text
-client/
-├── JokeApiClient
-└── CatsClient
+DogService
+    │
+    └── WebClientSupport
 
 service/
 └── DogService
@@ -115,9 +121,11 @@ service/
 
 ### Cats Service
 
+Responsabilidades:
+
 - CRUD de gatos
-- Consumo de API externa de pokemons
-- Exposición de endpoint de pokemons consumido por dogs-service
+- Consumo de API externa de Pokémons
+- Exposición de endpoint de Pokémons consumido por dogs-service
 - Consumo de dogs-service para obtener chistes
 - Gestión de imágenes
 
@@ -126,10 +134,12 @@ Dependencias compartidas:
 - common-exceptions
 - common-webclient
 
+Arquitectura:
+
 ```text
-client/
-├── DogsClient
-└── PokemonApiClient
+CatService
+    │
+    └── WebClientSupport
 
 service/
 └── CatService
@@ -259,15 +269,15 @@ mvn clean test
 
 ### Dogs Service
 
-- Instruction Coverage: 96%
+- Instruction Coverage: 100%
 - Branch Coverage: 100%
 
 ### Cats Service
 
-- Instruction Coverage: 96%
+- Instruction Coverage: 100%
 - Branch Coverage: 100%
 
-Ambos microservicios mantienen una cobertura de código superior al 95%.
+Ambos microservicios cuentan con cobertura completa de código mediante JaCoCo.
 
 Informes:
 
@@ -339,7 +349,7 @@ Módulos validados:
 - Módulo compartido para comunicación HTTP (`common-webclient`)
 - Gestión centralizada de errores
 - Reutilización de lógica común entre microservicios
-- Cobertura JaCoCo superior al 95%
+- Cobertura JaCoCo del 100% en ambos microservicios
 
 ## Autor
 

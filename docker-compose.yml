@@ -1,24 +1,24 @@
 services:
-  dogs-service:
-    volumes:
-      - dogs-data:/data
-    build: ./dogs-service
-    ports:
-      - "${DOGS_PORT}:${DOGS_PORT}"
-    environment:
-      - SERVER_PORT=${DOGS_PORT}
-      - CATS_SERVICE_URL=${CATS_SERVICE_URL}
+    dogs-service:
+        volumes:
+            - dogs-data:/data
+        build: ./dogs-service
+        ports:
+            - "${DOGS_PORT}:${DOGS_PORT}"
+        environment:
+            - SERVER_PORT=${DOGS_PORT}
+            - CATS_SERVICE_URL=${CATS_SERVICE_URL}
 
-  cats-service:
-    volumes:
-      - cats-data:/data
-    build: ./cats-service
-    ports:
-      - "${CATS_PORT}:${CATS_PORT}"
-    environment:
-      - SERVER_PORT=${CATS_PORT}
-      - DOGS_SERVICE_URL=${DOGS_SERVICE_URL}
+    cats-service:
+        volumes:
+            - cats-data:/data
+        build: ./cats-service
+        ports:
+            - "${CATS_PORT}:${CATS_PORT}"
+        environment:
+            - SERVER_PORT=${CATS_PORT}
+            - DOGS_SERVICE_URL=${DOGS_SERVICE_URL}
 
 volumes:
-  dogs-data:
-  cats-data:
+    dogs-data:
+    cats-data:

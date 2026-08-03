@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,10 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.example.cats.client.DogsClient;
-import com.example.cats.client.PokemonApiClient;
 import com.example.cats.domain.Cat;
 import com.example.cats.dto.CatRequest;
 import com.example.cats.dto.CatResponse;
@@ -34,6 +34,7 @@ import com.example.cats.repository.CatRepository;
 import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.PhotoStorageException;
 import com.example.common.exception.ResourceNotFoundException;
+import com.example.common.webclient.WebClientSupport;
 
 @ExtendWith(MockitoExtension.class)
 class CatServiceTest {
@@ -48,11 +49,7 @@ class CatServiceTest {
   private CatMapper mapper;
 
   @Mock
-  private WebClient webClient;
-  @Mock
-  private PokemonApiClient pokemonApiClient;
-  @Mock
-  private DogsClient dogsClient;
+  private WebClientSupport webClientSupport;
 
   private Cat cat;
 
@@ -239,8 +236,14 @@ class CatServiceTest {
       "Funny joke"
     );
 
-    when(dogsClient.getJoke())
-      .thenReturn(mockResponse);
+    when(webClientSupport.get(
+      any(String.class),
+      eq(JokeResponse.class),
+      any(String.class),
+      any(String.class),
+      any(Object[].class)
+    ))
+    .thenReturn(mockResponse);
 
     JokeResponse result = service.getJokeFromDogs();
 
@@ -251,8 +254,16 @@ class CatServiceTest {
   @Test
   void getJokeFromDogs_shouldThrowException_whenNullResponse() {
 
-    when(dogsClient.getJoke())
-      .thenThrow(new ExternalServiceException("Respuesta vacía de Dogs"));
+    when(webClientSupport.get(
+      any(String.class),
+      eq(JokeResponse.class),
+      any(String.class),
+      any(String.class),
+      any(Object[].class)
+    ))
+    .thenThrow(
+      new ExternalServiceException("Respuesta vacía de Dogs")
+    );
 
     assertThrows(ExternalServiceException.class, () -> {
       service.getJokeFromDogs();
@@ -268,8 +279,14 @@ class CatServiceTest {
       List.of(pokemon)
     );
 
-    when(pokemonApiClient.getPokemons(1))
-      .thenReturn(apiResponse);
+    when(webClientSupport.get(
+      any(String.class),
+      eq(PokemonApiResponse.class),
+      any(String.class),
+      any(String.class),
+      any(Object[].class)
+    ))
+    .thenReturn(apiResponse);
 
     List<PokemonResponse> result = service.getPokemons(1);
 
@@ -280,7 +297,13 @@ class CatServiceTest {
   @Test
   void getPokemons_shouldThrowException_whenResponseInvalid() {
 
-    when(pokemonApiClient.getPokemons(1))
+    when(webClientSupport.get(
+        any(String.class),
+        eq(PokemonApiResponse.class),
+        any(String.class),
+        any(String.class),
+        any(Object[].class)
+    ))
     .thenThrow(
       new ExternalServiceException(
         "Respuesta inválida de Pokemon API"
@@ -295,11 +318,14 @@ class CatServiceTest {
   @Test
   void getPokemons_shouldThrowException_whenResponseNull() {
 
-    when(pokemonApiClient.getPokemons(1))
-    .thenThrow(
-      new ExternalServiceException(
-        "Respuesta inválida de Pokemon API"
-      )
+    when(webClientSupport.get(
+        any(String.class),
+        eq(PokemonApiResponse.class),
+        any(String.class),
+        any(String.class),
+        any(Object[].class)
+    ))
+    .thenThrow(new ExternalServiceException("Respuesta inválida de Pokemon API")
     );
 
     assertThrows(ExternalServiceException.class, () -> {
@@ -310,8 +336,14 @@ class CatServiceTest {
   @Test
   void getJokeFromDogs_shouldThrowException_whenExternalError() {
 
-    when(dogsClient.getJoke())
-      .thenThrow(new ExternalServiceException("Error Dogs API"));
+    when(webClientSupport.get(
+      any(String.class),
+      eq(JokeResponse.class),
+      any(String.class),
+      any(String.class),
+      any(Object[].class)
+    ))
+    .thenThrow(new ExternalServiceException("Error Dogs API"));
 
     assertThrows(ExternalServiceException.class, () -> {
       service.getJokeFromDogs();
@@ -376,5 +408,46 @@ class CatServiceTest {
 
     assertEquals("Error saving photo", ex.getMessage());
     assertEquals(cause, ex.getCause());
+  }
+
+  @Test
+  void getPokemons_shouldThrowException_whenResultsAreNull() {
+
+    PokemonApiResponse apiResponse =
+      new PokemonApiResponse(null);
+
+    when(webClientSupport.get(
+      any(String.class),
+      eq(PokemonApiResponse.class),
+      any(String.class),
+      any(String.class),
+      any(Object[].class)
+    ))
+    .thenReturn(apiResponse);
+
+    assertThrows(
+      ExternalServiceException.class,
+      () -> service.getPokemons(1)
+    );
+  }
+
+  @Test
+  void uploadPhoto_shouldThrowPhotoStorageException_whenIOException() throws Exception {
+
+    MultipartFile file = mock(MultipartFile.class);
+
+    when(repository.findById(1L))
+      .thenReturn(Optional.of(cat));
+
+    when(file.getOriginalFilename())
+      .thenReturn("photo.jpg");
+
+    when(file.getInputStream())
+      .thenThrow(new IOException("Disk error"));
+
+    assertThrows(
+      PhotoStorageException.class,
+      () -> service.uploadPhoto(1L, file)
+    );
   }
 }

@@ -8,13 +8,12 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.cats.client.DogsClient;
-import com.example.cats.client.PokemonApiClient;
 import com.example.cats.domain.Cat;
 import com.example.cats.dto.CatRequest;
 import com.example.cats.dto.CatResponse;
@@ -23,8 +22,10 @@ import com.example.cats.dto.PokemonApiResponse;
 import com.example.cats.dto.PokemonResponse;
 import com.example.cats.mapper.CatMapper;
 import com.example.cats.repository.CatRepository;
+import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.PhotoStorageException;
 import com.example.common.exception.ResourceNotFoundException;
+import com.example.common.webclient.WebClientSupport;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,10 +33,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CatService {
 
+  @Value("${services.dogs.url}")
+  private String dogsServiceUrl;
   private final CatRepository repository;
   private final CatMapper mapper;
-  private final DogsClient dogsClient;
-  private final PokemonApiClient pokemonApiClient;
+  private final WebClientSupport webClientSupport;
+  
 
   @Cacheable("cats")
   public List<CatResponse> getAll() {
@@ -84,15 +87,31 @@ public class CatService {
   }
 
   public JokeResponse getJokeFromDogs() {
-    return dogsClient.getJoke();
-  }
+    return webClientSupport.get(
+      dogsServiceUrl + "/api/dogs/joke",
+      JokeResponse.class,
+      "Dogs API",
+      "Respuesta vacía de Dogs API"
+    );
+}
 
   public List<PokemonResponse> getPokemons(int limit) {
 
-    PokemonApiResponse response = pokemonApiClient.getPokemons(limit);
+    PokemonApiResponse response =
+      webClientSupport.get(
+        "https://pokeapi.co/api/v2/pokemon?limit={limit}",
+        PokemonApiResponse.class,
+        "Pokemon API",
+        "Respuesta vacía de Pokemon API",
+        limit
+      );
+
+    if (response.results() == null) {
+      throw new ExternalServiceException("Respuesta inválida de Pokemon API");
+    }
 
     return response.results();
-  }
+}
 
   public CatResponse uploadPhoto(Long id, MultipartFile file) {
 

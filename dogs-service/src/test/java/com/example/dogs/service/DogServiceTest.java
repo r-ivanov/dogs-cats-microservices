@@ -6,26 +6,29 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.PhotoStorageException;
 import com.example.common.exception.ResourceNotFoundException;
-import com.example.dogs.client.CatsClient;
-import com.example.dogs.client.JokeApiClient;
+import com.example.common.webclient.WebClientSupport;
 import com.example.dogs.domain.Dog;
 import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
@@ -45,9 +48,6 @@ class DogServiceTest {
 
   @InjectMocks
   private DogService service;
-  
-  @Mock
-  private CatsClient catsClient;
 
   @Mock
   private DogMapper dogMapper;
@@ -55,9 +55,7 @@ class DogServiceTest {
   private JokeMapper jokeMapper;
 
   @Mock
-  private WebClient webClient;
-  @Mock
-  private JokeApiClient jokeApiClient;
+  private WebClientSupport webClientSupport;
 
   private Dog dog;
 
@@ -302,8 +300,14 @@ class DogServiceTest {
         new PokemonApiResponse("Pikachu")
     );
 
-    when(catsClient.getPokemons(eq(1)))
-      .thenReturn(mockResponse);
+    when(webClientSupport.get(
+        any(String.class),
+        ArgumentMatchers.<ParameterizedTypeReference<List<PokemonApiResponse>>>any(),
+        any(String.class),
+        any(String.class),
+        any(Object[].class)
+    ))
+    .thenReturn(mockResponse);
 
     List<PokemonResponse> result = service.getPokemons(1);
 
@@ -322,8 +326,14 @@ class DogServiceTest {
         null
       );
 
-    when(jokeApiClient.getRandomJoke())
-      .thenReturn(mockResponse);
+    when(webClientSupport.get(
+        any(String.class),
+        eq(JokeApiResponse.class),
+        any(String.class),
+        any(String.class),
+        any(Object[].class)
+    ))
+    .thenReturn(mockResponse);
 
     when(jokeMapper.toJokeResponse(mockResponse))
       .thenReturn(
@@ -401,5 +411,25 @@ class DogServiceTest {
 
     assertEquals("error", ex.getMessage());
     assertEquals(cause, ex.getCause());
+  }
+
+  @Test
+  void uploadPhoto_shouldThrowPhotoStorageException_whenIOException() throws Exception {
+
+    MultipartFile file = mock(MultipartFile.class);
+
+    when(repository.findById(1L))
+      .thenReturn(Optional.of(dog));
+
+    when(file.getOriginalFilename())
+      .thenReturn("photo.jpg");
+
+    when(file.getInputStream())
+      .thenThrow(new IOException("Disk error"));
+
+    assertThrows(
+      PhotoStorageException.class,
+      () -> service.uploadPhoto(1L, file)
+    );
   }
 }

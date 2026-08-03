@@ -8,15 +8,15 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.example.common.exception.PhotoStorageException;
 import com.example.common.exception.ResourceNotFoundException;
-import com.example.dogs.client.CatsClient;
-import com.example.dogs.client.JokeApiClient;
+import com.example.common.webclient.WebClientSupport;
 import com.example.dogs.domain.Dog;
 import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
@@ -34,11 +34,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DogService {
 
+  @Value("${services.cats.url}")
+  private String catsServiceUrl;
   private final DogRepository repository;
   private final DogMapper mapper;
   private final JokeMapper jokeMapper;
-  private final CatsClient catsClient;
-  private final JokeApiClient jokeApiClient;
+  private final WebClientSupport webClientSupport;
 
 
   @Cacheable("dogs")
@@ -89,21 +90,34 @@ public class DogService {
 
   public JokeResponse getJoke() {
 
-    JokeApiResponse response = jokeApiClient.getRandomJoke();
+    JokeApiResponse response =
+      webClientSupport.get(
+        "https://v2.jokeapi.dev/joke/Any?lang=es",
+        JokeApiResponse.class,
+        "Joke API",
+        "Respuesta vacía de Joke API"
+      );
 
     return jokeMapper.toJokeResponse(response);
   }
 
   public List<PokemonResponse> getPokemons(int limit) {
 
-    List<PokemonApiResponse> response = catsClient.getPokemons(limit);
+    List<PokemonApiResponse> response =
+      webClientSupport.get(
+        catsServiceUrl + "/api/cats/pokemons?limit={limit}",
+        new ParameterizedTypeReference<List<PokemonApiResponse>>() {},
+        "Cats API",
+        "Respuesta vacía de Cats API",
+        limit
+      );
 
     return response.stream()
       .map(p -> new PokemonResponse(
         p.name()
       ))
       .toList();
-  }
+}
 
   public DogResponse uploadPhoto(Long id, MultipartFile file) {
 
