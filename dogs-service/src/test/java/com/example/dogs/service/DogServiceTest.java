@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.common.exception.ExternalServiceException;
@@ -41,6 +42,7 @@ import com.example.dogs.mapper.JokeMapper;
 import com.example.dogs.repository.DogRepository;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class DogServiceTest {
 
   @Mock
