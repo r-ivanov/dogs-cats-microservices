@@ -1,4 +1,4 @@
-package com.example.dogs.service;
+package com.example.dogs.service.impl;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,12 +27,13 @@ import com.example.dogs.dto.PokemonResponse;
 import com.example.dogs.mapper.DogMapper;
 import com.example.dogs.mapper.JokeMapper;
 import com.example.dogs.repository.DogRepository;
+import com.example.dogs.service.interfaces.IDogService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class DogService {
+public class DogService implements IDogService{
 
   @Value("${services.cats.url}")
   private String catsServiceUrl;
@@ -41,7 +42,7 @@ public class DogService {
   private final JokeMapper jokeMapper;
   private final WebClientSupport webClientSupport;
 
-
+  @Override
   @Cacheable("dogs")
   public List<DogResponse> getAll() {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
@@ -52,6 +53,7 @@ public class DogService {
       .collect(Collectors.toList());
   }
 
+  @Override
   @Cacheable(value = "dog", key = "#id")
   public DogResponse getById(Long id) {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
@@ -62,12 +64,14 @@ public class DogService {
     return mapper.toResponse(dog);
   }
 
+  @Override
   @CacheEvict(value = "dogs", allEntries = true)
   public DogResponse create(DogRequest request) {
     Dog dog = mapper.toEntity(request);
     return mapper.toResponse(repository.save(dog));
   }
 
+  @Override
   @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
   public DogResponse update(Long id, DogRequest request) {
     Dog dog = repository.findById(id)
@@ -80,6 +84,7 @@ public class DogService {
     return mapper.toResponse(repository.save(dog));
   }
 
+  @Override
   @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
   public void delete(Long id) {
     if (!repository.existsById(id)) {
@@ -88,6 +93,7 @@ public class DogService {
     repository.deleteById(id);
   }
 
+  @Override
   public JokeResponse getJoke() {
 
     JokeApiResponse response =
@@ -101,6 +107,7 @@ public class DogService {
     return jokeMapper.toJokeResponse(response);
   }
 
+  @Override
   public List<PokemonResponse> getPokemons(int limit) {
 
     List<PokemonApiResponse> response =
@@ -117,8 +124,9 @@ public class DogService {
         p.name()
       ))
       .toList();
-}
+  }
 
+  @Override
   public DogResponse uploadPhoto(Long id, MultipartFile file) {
 
     Dog dog = repository.findById(id)
@@ -154,5 +162,4 @@ public class DogService {
       throw new PhotoStorageException( "Error saving photo", e);
     }
   }
-
 }

@@ -40,6 +40,7 @@ import com.example.dogs.dto.PokemonResponse;
 import com.example.dogs.mapper.DogMapper;
 import com.example.dogs.mapper.JokeMapper;
 import com.example.dogs.repository.DogRepository;
+import com.example.dogs.service.impl.DogService;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")

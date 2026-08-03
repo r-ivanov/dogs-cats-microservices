@@ -22,8 +22,8 @@ import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
 import com.example.dogs.dto.JokeResponse;
 import com.example.dogs.dto.PokemonResponse;
+import com.example.dogs.service.interfaces.IDogService;
 import com.example.common.exception.ErrorResponse;
-import com.example.dogs.service.DogService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,7 +43,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DogController {
 
-  private final DogService service;
+  private final IDogService service;
 
 
   @Operation(

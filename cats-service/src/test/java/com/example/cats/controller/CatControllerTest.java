@@ -31,8 +31,8 @@ import com.example.cats.dto.CatRequest;
 import com.example.cats.dto.CatResponse;
 import com.example.cats.dto.JokeResponse;
 import com.example.cats.dto.PokemonResponse;
+import com.example.cats.service.interfaces.ICatService;
 import com.example.common.exception.ErrorResponse;
-import com.example.cats.service.CatService;
 import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +48,7 @@ class CatControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean
-    private CatService service;
+    private ICatService service;
 
     @Test
     void getAll_shouldReturnCats() throws Exception {

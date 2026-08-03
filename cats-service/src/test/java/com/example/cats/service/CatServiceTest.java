@@ -32,6 +32,7 @@ import com.example.cats.dto.PokemonApiResponse;
 import com.example.cats.dto.PokemonResponse;
 import com.example.cats.mapper.CatMapper;
 import com.example.cats.repository.CatRepository;
+import com.example.cats.service.impl.CatService;
 import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.PhotoStorageException;
 import com.example.common.exception.ResourceNotFoundException;

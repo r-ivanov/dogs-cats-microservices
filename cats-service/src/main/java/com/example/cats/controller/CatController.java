@@ -22,8 +22,8 @@ import com.example.cats.dto.CatRequest;
 import com.example.cats.dto.CatResponse;
 import com.example.cats.dto.JokeResponse;
 import com.example.cats.dto.PokemonResponse;
+import com.example.cats.service.interfaces.ICatService;
 import com.example.common.exception.ErrorResponse;
-import com.example.cats.service.CatService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,7 +43,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CatController {
 
-  private final CatService service;
+  private final ICatService service;
 
   @Operation(
     summary = "Get all cats",

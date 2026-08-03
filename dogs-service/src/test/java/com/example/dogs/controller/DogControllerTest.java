@@ -33,8 +33,8 @@ import com.example.dogs.dto.DogRequest;
 import com.example.dogs.dto.DogResponse;
 import com.example.dogs.dto.JokeResponse;
 import com.example.dogs.dto.PokemonResponse;
+import com.example.dogs.service.interfaces.IDogService;
 import com.example.common.exception.ErrorResponse;
-import com.example.dogs.service.DogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -48,7 +48,7 @@ class DogControllerTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @MockitoBean
-  private DogService service;
+  private IDogService service;
 
   @Test
   void getAll_shouldReturnDogs() throws Exception {

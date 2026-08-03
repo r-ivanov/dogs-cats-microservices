@@ -1,4 +1,4 @@
-package com.example.cats.service;
+package com.example.cats.service.impl;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,6 +22,7 @@ import com.example.cats.dto.PokemonApiResponse;
 import com.example.cats.dto.PokemonResponse;
 import com.example.cats.mapper.CatMapper;
 import com.example.cats.repository.CatRepository;
+import com.example.cats.service.interfaces.ICatService;
 import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.PhotoStorageException;
 import com.example.common.exception.ResourceNotFoundException;
@@ -31,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CatService {
+public class CatService implements ICatService{
 
   @Value("${services.dogs.url}")
   private String dogsServiceUrl;
@@ -40,6 +41,7 @@ public class CatService {
   private final WebClientSupport webClientSupport;
   
 
+  @Override
   @Cacheable("cats")
   public List<CatResponse> getAll() {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
@@ -50,6 +52,7 @@ public class CatService {
       .collect(Collectors.toList());
   }
 
+  @Override
   @Cacheable(value = "cat", key = "#id")
   public CatResponse getById(Long id) {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
@@ -60,12 +63,14 @@ public class CatService {
     return mapper.toResponse(cat);
   }
 
+  @Override
   @CacheEvict(value = "cats", allEntries = true)
   public CatResponse create(CatRequest request) {
     Cat cat = mapper.toEntity(request);
     return mapper.toResponse(repository.save(cat));
   }
 
+  @Override
   @CacheEvict(value = {"cats", "cat"}, allEntries = true)
   public CatResponse update(Long id, CatRequest request) {
     Cat cat = repository.findById(id)
@@ -78,6 +83,7 @@ public class CatService {
     return mapper.toResponse(repository.save(cat));
   }
 
+  @Override
   @CacheEvict(value = {"cats", "cat"}, allEntries = true)
   public void delete(Long id) {
     if (!repository.existsById(id)) {
@@ -86,6 +92,7 @@ public class CatService {
     repository.deleteById(id);
   }
 
+  @Override
   public JokeResponse getJokeFromDogs() {
     return webClientSupport.get(
       dogsServiceUrl + "/api/dogs/joke",
@@ -93,8 +100,9 @@ public class CatService {
       "Dogs API",
       "Respuesta vacía de Dogs API"
     );
-}
+  }
 
+  @Override
   public List<PokemonResponse> getPokemons(int limit) {
 
     PokemonApiResponse response =
@@ -111,8 +119,9 @@ public class CatService {
     }
 
     return response.results();
-}
+  }
 
+  @Override
   public CatResponse uploadPhoto(Long id, MultipartFile file) {
 
     Cat cat = repository.findById(id)
