@@ -1,24 +1,36 @@
 services:
-    dogs-service:
-        volumes:
-            - dogs-data:/data
-        build: ./dogs-service
-        ports:
-            - "${DOGS_PORT}:${DOGS_PORT}"
-        environment:
-            - SERVER_PORT=${DOGS_PORT}
-            - CATS_SERVICE_URL=${CATS_SERVICE_URL}
+  dogs-service:
+    volumes:
+      - dogs-data:/data
+    build: ./dogs-service
+    ports:
+      - "${DOGS_PORT}:${DOGS_PORT}"
+    environment:
+      - SERVER_PORT=${DOGS_PORT}
+      - CATS_SERVICE_URL=${CATS_SERVICE_URL}
 
-    cats-service:
-        volumes:
-            - cats-data:/data
-        build: ./cats-service
-        ports:
-            - "${CATS_PORT}:${CATS_PORT}"
-        environment:
-            - SERVER_PORT=${CATS_PORT}
-            - DOGS_SERVICE_URL=${DOGS_SERVICE_URL}
+  cats-service:
+    volumes:
+      - cats-data:/data
+    build: ./cats-service
+    ports:
+      - "${CATS_PORT}:${CATS_PORT}"
+    environment:
+      - SERVER_PORT=${CATS_PORT}
+      - DOGS_SERVICE_URL=${DOGS_SERVICE_URL}
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
 
 volumes:
-    dogs-data:
-    cats-data:
+  dogs-data:
+  cats-data:

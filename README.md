@@ -1,6 +1,6 @@
 # Dogs & Cats Microservices
 
-Proyecto de microservicios desarrollado con **Spring Boot 4**, que expone APIs REST para gestionar perros y gatos, incluyendo integración entre servicios, testing completo, dockerización y pipeline CI.
+Proyecto de microservicios desarrollado con **Spring Boot 4**, que expone APIs REST para gestionar perros y gatos, incluyendo integración entre servicios, testing completo, dockerización, observabilidad mediante Prometheus y Grafana, y pipeline CI.
 
 ---
 
@@ -18,9 +18,13 @@ Proyecto de microservicios desarrollado con **Spring Boot 4**, que expone APIs R
 - JUnit 5 / Mockito
 - MockMvc
 - JaCoCo
+- Maven Multi-Module
+- Spring Boot Actuator
+- Micrometer
+- Prometheus
+- Grafana
 - Docker & Docker Compose
 - GitHub Actions
-- Maven Multi-Module
 
 ---
 
@@ -32,11 +36,16 @@ dogs-cats-parent
 ├── common-webclient
 ├── dogs-service
 ├── cats-service
+├── prometheus.yml
 ├── docker-compose.yml
 └── .github/
     └── workflows/
         └── ci.yml
 ```
+
+## Observabilidad
+
+El proyecto incorpora monitorización mediante Actuator, Micrometer, Prometheus y Grafana.
 
 ### Parent Maven
 
@@ -111,12 +120,12 @@ Dependencias compartidas:
 Arquitectura:
 
 ```text
+IDogService
+      ▲
+      │
 DogService
-    │
-    └── WebClientSupport
-
-service/
-└── DogService
+      │
+      └── WebClientSupport
 ```
 
 ### Cats Service
@@ -137,12 +146,12 @@ Dependencias compartidas:
 Arquitectura:
 
 ```text
+ICatService
+      ▲
+      │
 CatService
-    │
-    └── WebClientSupport
-
-service/
-└── CatService
+      │
+      └── WebClientSupport
 ```
 
 ## DTOs y mapeo
@@ -232,6 +241,36 @@ mvn spring-boot:run
 mvn clean package
 docker compose up --build
 ```
+
+## Monitorización y Observabilidad
+
+Los microservicios exponen métricas mediante Spring Boot Actuator y Micrometer.
+
+### Dogs Service
+
+- http://localhost:8081/actuator
+- http://localhost:8081/actuator/health
+- http://localhost:8081/actuator/metrics
+- http://localhost:8081/actuator/prometheus
+
+### Cats Service
+
+- http://localhost:8082/actuator
+- http://localhost:8082/actuator/health
+- http://localhost:8082/actuator/metrics
+- http://localhost:8082/actuator/prometheus
+
+### Prometheus
+
+Interfaz web:
+
+- http://localhost:9090
+
+### Grafana
+
+Interfaz web:
+
+- http://localhost:3000
 
 ## Testing
 
@@ -350,6 +389,11 @@ Módulos validados:
 - Gestión centralizada de errores
 - Reutilización de lógica común entre microservicios
 - Cobertura JaCoCo del 100% en ambos microservicios
+- Observabilidad mediante Spring Boot Actuator
+- Métricas de aplicación con Micrometer
+- Integración con Prometheus
+- Dashboards de monitorización con Grafana
+- Monitorización de tráfico HTTP, memoria JVM y CPU
 
 ## Autor
 

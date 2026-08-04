@@ -5,6 +5,7 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
+
   datasource:
     url: jdbc:h2:mem:catsdb
     driver-class-name: org.h2.Driver
@@ -25,3 +26,9 @@ server:
 services:
   dogs:
     url: ${DOGS_SERVICE_URL:http://dogs-service:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
