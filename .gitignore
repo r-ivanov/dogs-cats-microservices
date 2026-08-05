@@ -8,9 +8,9 @@ jacoco.exec
 
 # IDEs
 /.idea
-/.classpath
-/.project
-/.settings
+.classpath
+.project
+.settings/
 *.iml
 
 # OS
