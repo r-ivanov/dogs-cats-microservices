@@ -29,7 +29,9 @@ import com.example.common.exception.ResourceNotFoundException;
 import com.example.common.webclient.WebClientSupport;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CatService implements ICatService{
@@ -45,7 +47,7 @@ public class CatService implements ICatService{
   @Cacheable("cats")
   public List<CatResponse> getAll() {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
-    System.out.println("Fetching from DB");
+    log.info("Fetching cats from database");
     return repository.findAll()
       .stream()
       .map(mapper::toResponse)
@@ -56,7 +58,7 @@ public class CatService implements ICatService{
   @Cacheable(value = "cat", key = "#id")
   public CatResponse getById(Long id) {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
-    System.out.println("Fetching from DB");
+    log.info("Searching cat with id {}", id);
     Cat cat = repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Cat not found"));
 
@@ -66,6 +68,7 @@ public class CatService implements ICatService{
   @Override
   @CacheEvict(value = "cats", allEntries = true)
   public CatResponse create(CatRequest request) {
+    log.info("Creating cat with name {}", request.name());
     Cat cat = mapper.toEntity(request);
     return mapper.toResponse(repository.save(cat));
   }
@@ -73,6 +76,7 @@ public class CatService implements ICatService{
   @Override
   @CacheEvict(value = {"cats", "cat"}, allEntries = true)
   public CatResponse update(Long id, CatRequest request) {
+    log.info("Updating cat with id {}", id);
     Cat cat = repository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Cat not found"));
 
@@ -86,6 +90,7 @@ public class CatService implements ICatService{
   @Override
   @CacheEvict(value = {"cats", "cat"}, allEntries = true)
   public void delete(Long id) {
+    log.info("Deleting cat with id {}", id);
     if (!repository.existsById(id)) {
       throw new ResourceNotFoundException("Cat not found");
     }
@@ -94,6 +99,7 @@ public class CatService implements ICatService{
 
   @Override
   public JokeResponse getJokeFromDogs() {
+    log.info("Requesting jokes from dogs-service");
     return webClientSupport.get(
       dogsServiceUrl + "/api/dogs/joke",
       JokeResponse.class,
@@ -104,7 +110,7 @@ public class CatService implements ICatService{
 
   @Override
   public List<PokemonResponse> getPokemons(int limit) {
-
+    log.info("Requesting {} pokemons from Pokemon API", limit);
     PokemonApiResponse response =
       webClientSupport.get(
         "https://pokeapi.co/api/v2/pokemon?limit={limit}",
@@ -123,7 +129,7 @@ public class CatService implements ICatService{
 
   @Override
   public CatResponse uploadPhoto(Long id, MultipartFile file) {
-
+    log.info("Uploading photo for cat with id {}", id);
     Cat cat = repository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Cat not found"));
 

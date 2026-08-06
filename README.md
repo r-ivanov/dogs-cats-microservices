@@ -23,6 +23,8 @@ Proyecto de microservicios desarrollado con **Spring Boot 4**, que expone APIs R
 - Micrometer
 - Prometheus
 - Grafana
+- Loki
+- Promtail
 - Docker & Docker Compose
 - GitHub Actions
 
@@ -38,6 +40,7 @@ dogs-cats-parent
 ├── cats-service
 ├── prometheus.yml
 ├── docker-compose.yml
+├── promtail.yml
 └── .github/
     └── workflows/
         └── ci.yml
@@ -272,6 +275,22 @@ Interfaz web:
 
 - http://localhost:3000
 
+### Loki
+
+Sistema de centralización y almacenamiento de logs.
+
+Interfaz/API:
+
+- http://localhost:3100
+
+### Promtail
+
+Agente encargado de recopilar los logs de los contenedores Docker y enviarlos a Loki.
+
+Configuración:
+
+- promtail.yml
+
 ## Testing
 
 ### Proyecto completo
@@ -393,6 +412,7 @@ Módulos validados:
 - Métricas de aplicación con Micrometer
 - Integración con Prometheus
 - Dashboards de monitorización con Grafana
+- Centralización de logs con Loki y Promtail
 - Monitorización de tráfico HTTP, memoria JVM y CPU
 
 ## Autor

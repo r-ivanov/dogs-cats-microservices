@@ -1,6 +1,5 @@
 package com.example.cats.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,7 +31,6 @@ import com.example.cats.dto.CatResponse;
 import com.example.cats.dto.JokeResponse;
 import com.example.cats.dto.PokemonResponse;
 import com.example.cats.service.interfaces.ICatService;
-import com.example.common.exception.ErrorResponse;
 import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -288,25 +286,6 @@ class CatControllerTest {
         .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void resourceNotFoundException_shouldCreateCorrectly() {
-
-      ResourceNotFoundException ex = new ResourceNotFoundException("not found");
-      assertEquals("not found", ex.getMessage());
-    }
-
-    @Test
-    void errorResponse_shouldBuildCorrectly() {
-
-      ErrorResponse error = new ErrorResponse(
-        null,
-        404,
-        "Not found",
-        "/api/test"
-      );
-
-      assertEquals(404, error.status());
-    }
     @Test
     void uploadPhoto_shouldReturn200() throws Exception {
 

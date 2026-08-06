@@ -30,7 +30,9 @@ import com.example.dogs.repository.DogRepository;
 import com.example.dogs.service.interfaces.IDogService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DogService implements IDogService{
@@ -46,7 +48,7 @@ public class DogService implements IDogService{
   @Cacheable("dogs")
   public List<DogResponse> getAll() {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
-    System.out.println("Fetching from DB");
+    log.info("Fetching dogs from database");
     return repository.findAll()
       .stream()
       .map(mapper::toResponse)
@@ -57,7 +59,7 @@ public class DogService implements IDogService{
   @Cacheable(value = "dog", key = "#id")
   public DogResponse getById(Long id) {
     // Comprobar que se ha cacheado y solo se imprime en la primera petición GET
-    System.out.println("Fetching from DB");
+    log.info("Searching dog with id {}", id);
     Dog dog = repository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
 
@@ -67,6 +69,7 @@ public class DogService implements IDogService{
   @Override
   @CacheEvict(value = "dogs", allEntries = true)
   public DogResponse create(DogRequest request) {
+    log.info("Creating dog with name {}", request.name());
     Dog dog = mapper.toEntity(request);
     return mapper.toResponse(repository.save(dog));
   }
@@ -74,6 +77,7 @@ public class DogService implements IDogService{
   @Override
   @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
   public DogResponse update(Long id, DogRequest request) {
+    log.info("Updating dog with id {}", id);
     Dog dog = repository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
 
@@ -87,6 +91,7 @@ public class DogService implements IDogService{
   @Override
   @CacheEvict(value = {"dogs", "dog"}, allEntries = true)
   public void delete(Long id) {
+    log.info("Deleting dog with id {}", id);
     if (!repository.existsById(id)) {
       throw new ResourceNotFoundException("Dog not found");
     }
@@ -95,7 +100,7 @@ public class DogService implements IDogService{
 
   @Override
   public JokeResponse getJoke() {
-
+    log.info("Requesting joke from Joke API");
     JokeApiResponse response =
       webClientSupport.get(
         "https://v2.jokeapi.dev/joke/Any?lang=es",
@@ -109,7 +114,7 @@ public class DogService implements IDogService{
 
   @Override
   public List<PokemonResponse> getPokemons(int limit) {
-
+    log.info("Requesting {} pokemons from cats-service", limit);
     List<PokemonApiResponse> response =
       webClientSupport.get(
         catsServiceUrl + "/api/cats/pokemons?limit={limit}",
@@ -128,7 +133,7 @@ public class DogService implements IDogService{
 
   @Override
   public DogResponse uploadPhoto(Long id, MultipartFile file) {
-
+    log.info("Uploading photo for dog with id {}", id);
     Dog dog = repository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Dog not found"));
 

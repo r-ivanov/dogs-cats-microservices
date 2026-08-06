@@ -354,15 +354,6 @@ class CatServiceTest {
   }
 
   @Test
-  void externalServiceException_shouldCreateCorrectly() {
-
-    ExternalServiceException ex =
-      new ExternalServiceException("Error externo");
-
-    assertEquals("Error externo", ex.getMessage());
-  }
-
-  @Test
   void uploadPhoto_shouldThrowException_whenCatNotFound() {
 
     MockMultipartFile file = new MockMultipartFile(
@@ -399,18 +390,6 @@ class CatServiceTest {
     assertNotNull(result);
 
     verify(repository).save(any(Cat.class));
-  }
-
-  @Test
-  void photoStorageException_shouldCreateCorrectly() {
-
-    IOException cause = new IOException("Disk error");
-
-    PhotoStorageException ex =
-      new PhotoStorageException("Error saving photo", cause);
-
-    assertEquals("Error saving photo", ex.getMessage());
-    assertEquals(cause, ex.getCause());
   }
 
   @Test

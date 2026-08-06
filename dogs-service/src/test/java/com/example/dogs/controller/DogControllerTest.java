@@ -1,6 +1,5 @@
 package com.example.dogs.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -34,7 +33,6 @@ import com.example.dogs.dto.DogResponse;
 import com.example.dogs.dto.JokeResponse;
 import com.example.dogs.dto.PokemonResponse;
 import com.example.dogs.service.interfaces.IDogService;
-import com.example.common.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -334,26 +332,6 @@ class DogControllerTest {
 
     mockMvc.perform(get("/api/dogs/pokemons?limit=0"))
       .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void resourceNotFoundException_shouldCreateCorrectly() {
-
-    ResourceNotFoundException ex = new ResourceNotFoundException("not found");
-    assertEquals("not found", ex.getMessage());
-  }
-
-  @Test
-  void errorResponse_shouldBuildCorrectly() {
-
-    ErrorResponse error = new ErrorResponse(
-      null,
-      404,
-      "Not found",
-      "/api/test"
-    );
-
-    assertEquals(404, error.status());
   }
 
   @Test

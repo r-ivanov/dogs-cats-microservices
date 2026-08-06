@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(ResourceNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -36,7 +40,7 @@ public class GlobalExceptionHandler {
                                      HttpServletRequest request) {
 
     // log debug
-    ex.printStackTrace();
+    log.error("Unexpected error", ex);
     return new ErrorResponse(
       LocalDateTime.now(),
       HttpStatus.INTERNAL_SERVER_ERROR.value(),

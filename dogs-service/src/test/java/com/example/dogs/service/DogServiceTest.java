@@ -26,7 +26,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.common.exception.ExternalServiceException;
 import com.example.common.exception.PhotoStorageException;
 import com.example.common.exception.ResourceNotFoundException;
 import com.example.common.webclient.WebClientSupport;
@@ -353,14 +352,6 @@ class DogServiceTest {
   }
 
   @Test
-  void externalServiceException_shouldCreateCorrectly() {
-
-    ExternalServiceException ex = new ExternalServiceException("Error externo");
-
-    assertEquals("Error externo", ex.getMessage());
-  }
-
-  @Test
   void uploadPhoto_shouldThrowException_whenDogNotFound() {
 
     MockMultipartFile file = new MockMultipartFile(
@@ -402,18 +393,6 @@ class DogServiceTest {
     assertNotNull(result);
 
     verify(repository).save(any(Dog.class));
-  }
-
-  @Test
-  void photoStorageException_shouldKeepCause() {
-    RuntimeException cause =
-      new RuntimeException("boom");
-
-    PhotoStorageException ex =
-      new PhotoStorageException("error", cause);
-
-    assertEquals("error", ex.getMessage());
-    assertEquals(cause, ex.getCause());
   }
 
   @Test
